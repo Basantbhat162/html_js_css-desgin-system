@@ -1,226 +1,156 @@
 # Component Catalog
 
-All components must be original, scoped with `eds-`, and designed for Elementor HTML widgets. Use cards only for repeated objects. For section structure, prefer whitespace, type hierarchy, alignment, and one restrained accent treatment. Use modern libraries such as Preline/Tailwind as pattern references only; translate the discipline into plain HTML/CSS/JS.
+Every component below ships as real code in `dist/eds.css` (styles) and `dist/eds.js` (behavior). Copy the markup shown, include the two dist files once per page, and it works. See `styleguide.html` for live rendered previews of everything here with copyable code.
 
-## Component API Rules
+Class convention: `eds-block`, `eds-block__element`, `eds-block--modifier`. Behavior binds to `data-eds-*` attributes, never to visual classes. Base classes stay neutral; variants own color, state, and emphasis.
 
-- Use a base class for structure and a modifier for intent: `.eds-btn` plus `.eds-btn--primary`, `.eds-notice` plus `.eds-notice--success`.
-- Keep base classes neutral; variants own color, state, and emphasis.
-- Keep hover, focus, active, disabled, and loading behavior inside the component contract.
-- Do not invent one-off hover colors in page sections. If a state repeats, promote it to a token or variant.
-- Use `aria-pressed` for toggle filters and amount cells; use `aria-selected` only for real tabs.
+## Layout Primitives
 
-## Base Section
+| Class | Purpose |
+| --- | --- |
+| `.eds-container` / `.eds-container--narrow` | Centered max-width wrapper with responsive gutters |
+| `.eds-section` / `.eds-section--sunken` | Vertical page band; sunken variant uses the subtle background token |
+| `.eds-section-header` | Title + optional utility copy + optional inline action |
+| `.eds-stack-{1,2,3,4,5,6,8}` | Vertical flex stack with gap from the spacing scale |
+| `.eds-row-{1,2,3,4,6}` + `--between`, `--center`, `--end`, `--nowrap` | Horizontal flex row with gap and alignment modifiers |
+| `.eds-grid-2` | 1-column on mobile, 2-column from tablet up |
+| `.eds-divider` | Single functional horizontal rule |
 
-Every component should live inside a unique wrapper:
+Section headers: one heading, optional short supporting line only if it adds new information, optional action only when it is the next useful step. No cards around headers, no subtitles that restate the heading.
+
+## Text & Misc Utilities
+
+`.eds-text-xs`, `.eds-text-sm`, `.eds-text-muted`, `.eds-text-faint`, `.eds-text-center`, `.eds-weight-medium`, `.eds-weight-semibold`, `.eds-tabular` (tabular numbers for prices), `.eds-mt-{2,4,6,8,12}`, `.eds-p-{4,6}`, `.eds-hide-mobile`, `.eds-visually-hidden`.
+
+## Buttons — `.eds-btn`
+
+Variants: `--primary`, `--secondary`, `--ghost`, `--danger`. Sizes: `--sm`, `--lg`. Width: `--full`.
 
 ```html
-<section class="eds-section eds-product-strip" aria-labelledby="eds-product-strip-title">
-  <div class="eds-container">
-    ...
-  </div>
-</section>
+<button class="eds-btn eds-btn--primary">Buy now</button>
+<a class="eds-btn eds-btn--secondary" href="/offers">View offers</a>
 ```
 
-```css
-.eds-section,
-.eds-section * {
-  box-sizing: border-box;
-}
+- Minimum touch height 44px; `touch-action: manipulation` built in.
+- Primary hover darkens the background and keeps white text — theme link styles are overridden inside the component.
+- Async: add `data-eds-loading="Processing…"` to the submit button and `data-eds-submit` to its `<form>`; JS disables the button and swaps the label during submit. `.eds-btn--loading` shows the inline spinner.
+- One primary CTA per purchase flow. Secondary actions use `--ghost` or a menu.
 
-.eds-container {
-  width: min(100%, 1180px);
-  margin-inline: auto;
-  padding-inline: var(--eds-space-4);
-}
+## Badges & Chips
 
-@media (min-width: 600px) {
-  .eds-container { padding-inline: var(--eds-space-6); }
-}
-```
+- `.eds-badge` + `--primary`, `--success`, `--warning`, `--danger` — small status/discount labels. Use only when the badge carries real meaning.
+- `.eds-chip` / `.eds-chip--active` — filter/category pills. Wrap in `.eds-chip-scroll` for horizontal snap-scroll on mobile.
+- `.eds-trust-chip` — inline trust cue (small icon + short text), no card, no border. Keep each under 4 words; never invent proof.
 
-## Section Header
+## Cards
 
-Use when a section needs orientation.
+- `.eds-card` — bordered surface for repeated objects only. `--interactive` adds hover lift, `--flush` removes padding for edge-to-edge media.
+- `.eds-product-card` — stable media area (`aspect-ratio` reserved), title, metadata line, `.eds-price`, one CTA. Two-column at 320px only if content stays readable; otherwise use rows.
+- `.eds-product-row` — compact horizontal product entry (`72px` media + content) for dense lists.
+- `.eds-tile` — icon + label link tile for category navigation.
+- `.eds-stat` — number + label pair; no card wrapper needed.
 
-Required:
-
-- One heading.
-- Optional short supporting line only if it adds new information.
-- Optional action only when it is the next useful step.
-
-Avoid:
-
-- Cards around headers.
-- Generic subtitles that restate the heading.
-- Multiple badges, counters, and CTAs before the actual content.
-
-## Buttons
-
-Use real `<a>` or `<button>` elements.
-
-Variants:
-
-- Primary: blue fill, white text, for the one main action.
-- Secondary: white fill, blue/black text, border.
-- Plain: transparent or soft surface, black/blue text, for low-emphasis actions.
-- Icon: visible label or `aria-label`.
-
-Standards:
-
-- Minimum height `44px`; preferred commerce CTA `46-52px`.
-- Radius should usually be `6px`, not a large pill.
-- Use `touch-action: manipulation`.
-- Include `:focus-visible`, `:hover` for pointer devices, `:active` press feedback.
-- Primary hover must keep white text and move to darker blue. Do not let Elementor/theme link styles turn primary button text blue.
-- Secondary hover may use soft blue surface, blue border, and blue text.
-- Use `@media (hover: none)` to neutralize lift effects on touch devices when needed.
-- Disable submit buttons during JS actions and show text change or spinner.
-
-## Product Card
-
-Use for top-ups, gift cards, games, offers, vouchers, subscriptions, and related products.
-
-Required:
-
-- Product image, product mark, or stable reserved media area.
-- Product title.
-- Category, region, or metadata.
-- Price/value/status if applicable.
-- Primary action.
-
-Optional:
-
-- Discount badge.
-- Trust cue: instant delivery, verified, secure.
-- Rating/sold count only when real data is available.
-
-Mobile behavior:
-
-- Cards can be 2-column only if content remains readable at `320px`; otherwise use single-column horizontal rows.
-- Preserve image aspect ratio.
-- Keep CTA visible without forcing huge cards.
-- Show only one direct action on the card. Move details, share, wishlist, and secondary actions to the product page or a compact menu.
-- Do not add a border, shadow, badge, and tinted surface all at once. Pick the minimum needed.
-
-## Product List Row
-
-Use when density matters more than image drama.
-
-Required:
-
-- Compact image or product mark.
-- Product name.
-- One metadata line.
-- Price/value or status.
-- One action.
-
-Mobile behavior:
-
-- Use `grid-template-columns: 72px 1fr`.
-- Allow title wrapping before shrinking text.
-- Keep the action below or right-aligned depending on available width.
-
-## Category Chips and Tiles
-
-Use when users need fast browsing.
-
-- Chips: horizontal scroll on mobile with `scroll-snap-type: x proximity`.
-- Tiles: 2-column mobile grid, 3-4 columns tablet, 5-6 columns desktop.
-- Active category uses blue background, blue outline, or blue underline, not multiple treatments.
-- Include icons only if they are inline SVG or existing site assets; do not use emoji as structural icons.
-- Do not use rounded capsule pills by default. Use small-radius chips unless the surrounding design explicitly calls for capsules.
-
-## Search Bar
-
-Use for product-heavy sections.
-
-- Full-width on mobile.
-- Search input height `48-56px`.
-- Include visible label or `aria-label`.
-- Debounce JS filtering at `150-250ms`.
-- Show recent/popular suggestions for empty query when useful.
-- Show helpful no-results state with reset action.
-- Keep search visually dominant only when discovery is the section's main job.
-
-## Trust Strip
-
-Use compact trust cues near conversion points.
-
-Examples:
-
-- Instant delivery
-- Secure checkout
-- Verified products
-- 24/7 support
-
-Rules:
-
-- Keep each item under 4 words when possible.
-- Use a single blue accent mark, selected state, or filled control.
-- Do not place decorative vertical color rails beside trust, status, or note text.
-- On mobile, use a 2-column grid or inline row; do not stack into a long wall.
-- Do not invent proof. Use generic trust cues only when they are true for the business.
-
-## Sticky Mobile CTA
-
-Use for high-conversion product/detail sections.
-
-- Fixed to bottom only when it materially helps conversion.
-- Respect safe areas: `padding-bottom: max(12px, env(safe-area-inset-bottom))`.
-- Add body/section bottom padding so content is not hidden.
-- Include price/summary and one CTA.
-- Do not add secondary links inside the sticky bar.
-
-## Tabs and Segmented Controls
-
-Use for 2-5 in-context choices such as product type, region, amount, or payment method.
-
-- Use buttons inside a `role="tablist"` only if panels switch content.
-- Use `aria-selected`, `aria-controls`, and keyboard support for true tabs.
-- For simple filters, buttons with `aria-pressed` are enough.
-- Keep tab labels short; allow horizontal scroll on small screens.
-- Prefer underline tabs for panels and filled chips for filters.
-- Vanilla JS should only toggle `aria-selected`, `hidden` or an active class, and panel visibility.
-- Do not use inset segmented controls for top-level page navigation. Use links, underline nav, sidebar, or simple category rows.
-
-## Accordions and FAQ
-
-- Use native `<details>` and `<summary>` where possible.
-- Keep answers concise.
-- Add structured spacing and a single divider or border, not nested cards.
-- Do not animate height with expensive layout loops; CSS grid or max-height is acceptable for small content only.
+Never nest cards. Never wrap page headers, trust strips, or whole sections in cards. One direct action per card — move share/wishlist/details to a `data-eds-menu` or the product page.
 
 ## Forms
 
-- Every input needs a visible label.
-- Use `type`, `inputmode`, `autocomplete`, and `aria-describedby`.
-- Use `:focus-within` on field wrappers for stable focus rings.
-- Use helper text for format guidance, not placeholder-only labels.
-- Show errors below the field and announce with `role="alert"` or `aria-live`.
-- Validate on blur or submit, not aggressively on every keystroke.
-- Primary submit button must show loading and prevent double submission.
+- `.eds-field` — label + control + optional help/error text. `--error` pairs with a `role="alert"` message below the field.
+- `.eds-input`, `.eds-select`, `.eds-textarea` — bordered controls with the token focus ring. Always set `type`, `inputmode`, and `autocomplete`.
+- `.eds-check` — checkbox/radio row with label.
+- `.eds-qty` — quantity stepper: `data-eds-qty` wrapper, `data-eds-qty-dec` / `data-eds-qty-inc` buttons around a number input; JS clamps to min/max.
+- `data-eds-submit` on a `<form>` — prevents double submission and drives the loading button.
 
-## Loading, Empty, Error
+Every input needs a visible `<label>`. Validate on blur or submit, not every keystroke.
 
-- Loading: skeleton for product rows/cards or buttons when waiting over `300ms`.
-- Skeletons must reserve final content space and animate only background position or opacity.
-- Empty: explain what is missing and provide a next action.
-- Error: state what failed and how to recover.
-- Never leave blank white space as the only state.
+## Tabs — `data-eds-tabs`
 
-## Notices and Toasts
+```html
+<div class="eds-tabs" data-eds-tabs>
+  <div class="eds-tabs__list" role="tablist" aria-label="Sections">
+    <button class="eds-tabs__tab" role="tab" id="t1" aria-controls="p1">One</button>
+    <button class="eds-tabs__tab" role="tab" id="t2" aria-controls="p2">Two</button>
+  </div>
+  <div class="eds-tabs__panel" role="tabpanel" id="p1" aria-labelledby="t1">…</div>
+  <div class="eds-tabs__panel" role="tabpanel" id="p2" aria-labelledby="t2" hidden>…</div>
+</div>
+```
 
-- Use notices inline when the message affects the current form, checkout, product, or state.
-- Use toasts only for transient confirmation or background events.
-- Include `role="status"` or `aria-live="polite"` for non-urgent success; use `role="alert"` for errors.
-- Dismiss buttons need visible labels or `aria-label`.
-- Toast removal should animate opacity/transform only, then set `hidden` in JS after the transition.
+JS manages `aria-selected`, panel `hidden`, and arrow-key navigation. First tab is selected unless one has `aria-selected="true"` in the markup. Underline style, horizontal scroll on small screens. Never use tabs or inset segmented controls as whole-page navigation.
 
-## Motion
+## Filters — `data-eds-filter`
+
+Single-select chip group that filters items by category:
+
+```html
+<div class="eds-chip-scroll" data-eds-filter data-eds-filter-target="#grid">
+  <button class="eds-chip" aria-pressed="true" data-eds-filter-value="all">All</button>
+  <button class="eds-chip" aria-pressed="false" data-eds-filter-value="cards">Gift cards</button>
+</div>
+<div id="grid" class="eds-grid-2">
+  <article class="eds-product-card" data-eds-category="cards">…</article>
+</div>
+```
+
+JS toggles `aria-pressed` on chips and `hidden` on items — markup is never rewritten. `aria-pressed` is for filters; `aria-selected` only for real tabs.
+
+## Search Filter — `data-eds-search`
+
+Input with `data-eds-search` + `data-eds-search-target="#list"` filters items by their `data-eds-search-text` attribute (falls back to text content). Optional `data-eds-search-empty="#empty"` toggles an empty state with a reset action. Debounced ~200ms; announces result count via `aria-live`. Style the composition with `.eds-search` (full-width input + button, 48px+ height).
+
+## Accordion — `.eds-accordion`
+
+Native `<details>`/`<summary>` styling — fully functional with zero JS. The JS layer only adds a smooth open animation on `.eds-accordion__body`. Ideal for FAQs. Single dividers between rows, never nested cards.
+
+## Modal — `data-eds-modal`
+
+Native `<dialog class="eds-modal" id="my-modal">`. Open with `<button data-eds-modal="my-modal">` (element id, no `#`) or `EDS.openModal('my-modal')`. Close via `data-eds-modal-close` buttons, Esc, or backdrop click (`EDS.closeModal('my-modal')` also available). Native dialog handles focus containment. Add `.eds-modal--sheet` for a mobile bottom sheet.
+
+## Toasts — `EDS.toast()`
+
+```js
+EDS.toast('Added to cart', 'success'); // 'info' | 'success' | 'danger'
+```
+
+Declarative: `<button data-eds-toast="Copied!" data-eds-toast-type="success">`. A single `aria-live="polite"` `.eds-toast-region` is created on demand; toasts auto-dismiss after 4s with a transform/opacity exit (`.eds-toast--leaving`), then `hidden`/removal. Use toasts only for transient confirmations — state that affects a form or checkout belongs in an inline notice.
+
+## Notices — `.eds-notice`
+
+Inline static messages: `--info`, `--success`, `--warning`, `--danger`. Use `role="alert"` only for errors that appear dynamically; `role="status"` for polite success.
+
+## Menu — `data-eds-menu`
+
+Dropdown for secondary/overflow actions: trigger `<button>` + `.eds-menu__panel` (`--end` right-aligns). JS handles `aria-expanded`, `aria-haspopup`, outside click, and Esc. This is where extra actions go instead of cluttering cards or rows.
+
+## Copy Button — `data-eds-copy`
+
+`<button data-eds-copy="TEXT">` or `data-eds-copy-target="#selector"` copies to the clipboard and fires a success toast. Useful for voucher and gift-card codes.
+
+## Sticky CTA — `.eds-sticky-cta`
+
+Bottom-fixed mobile purchase bar: price/summary + one primary action, nothing else. Hidden from tablet up by default. Respects `env(safe-area-inset-bottom)`; add matching bottom padding to the page content so nothing is hidden.
+
+## Navigation & Wayfinding
+
+- `.eds-breadcrumbs` — `<nav aria-label="Breadcrumb">` with inline list and current-page state.
+- `.eds-pagination` — page links with `aria-current="page"` active state.
+
+## Data Display
+
+- `.eds-table` — horizontal rules only, tabular numbers for price columns, horizontal scroll wrapper on mobile.
+- `.eds-price` — price emphasis with optional struck original price, tabular numbers.
+- `.eds-avatar` / `--lg` — image or initials disc.
+
+## Loading States — `.eds-skeleton`
+
+`--text`, `--title`, `--media`, `--circle`. Opacity pulse only — no gradient sweeps. Reserve final content dimensions so nothing shifts. Use skeletons when waiting over ~300ms; pair with empty states that explain the next action and error states that offer recovery.
+
+## Motion Contract (applies to all components)
 
 - Animate only `transform` and `opacity`.
-- Keep hover/press feedback `80-180ms`; keep entrance motion under `500ms`.
-- Do not animate height, width, top, left, borders, or layout-dependent values.
-- Do not rely on animation to reveal required content or set functional state.
-- Avoid global `prefers-reduced-motion` rules that collapse every transition to `.01ms`; if a reduced-motion rule is needed, remove only decorative entrance motion and keep the static layout identical.
+- Press feedback 80–150ms, hover/focus 150–220ms, panels 220–320ms, nothing over 500ms.
+- No content may exist only behind an animation.
+- Reduced-motion handling removes decorative entrance motion only; hover/focus/press feedback stays.
+
+## Adding a New Component
+
+Follow `references/library-growth.md`: implement it in `dist/` first, document it here using the same format, then add a live preview to `styleguide.html`.

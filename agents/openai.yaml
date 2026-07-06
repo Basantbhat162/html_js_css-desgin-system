@@ -1,0 +1,4 @@
+interface:
+  display_name: "Elementor Design System"
+  short_description: "Reusable Elementor UI tokens and components"
+  default_prompt: "Use $elementor-design-system to build a premium mobile-first Elementor HTML/CSS/JS component."

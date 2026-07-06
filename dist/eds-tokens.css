@@ -1,0 +1,216 @@
+/* ==========================================================================
+   EDS — Elementor Design System v2
+   File: eds-tokens.css (Layer 1 of 2 — design tokens only)
+   --------------------------------------------------------------------------
+   Drop-in, zero-build design tokens for plain HTML/CSS/JS and WordPress /
+   Elementor. Scope: apply the `eds` class to any wrapper, or the tokens
+   also attach to :root so they are available site-wide.
+
+   Architecture (3 layers):
+     1. Primitives  — raw ramps and scales. Never reference these in
+                      component code; they exist to feed layer 2.
+     2. Semantic    — the THEMING API. Rebrand an entire project by
+                      overriding ~12 of these variables.
+     3. Component   — per-component knobs (button height, card padding...)
+                      so a single component can be tuned without forking.
+
+   Theming example (paste after this file):
+     .eds {
+       --eds-primary: #0f766e;
+       --eds-primary-hover: #115e59;
+       --eds-ring: #14b8a6;
+     }
+   ========================================================================== */
+
+:root,
+.eds {
+  /* ------------------------------------------------------------------
+     LAYER 1 — PRIMITIVES
+     ------------------------------------------------------------------ */
+
+  /* Blue ramp (default brand) */
+  --eds-blue-50: #eff6ff;
+  --eds-blue-100: #dbeafe;
+  --eds-blue-200: #bfdbfe;
+  --eds-blue-300: #93c5fd;
+  --eds-blue-400: #60a5fa;
+  --eds-blue-500: #3b82f6;
+  --eds-blue-600: #2563eb;
+  --eds-blue-700: #1d4ed8;
+  --eds-blue-800: #1e40af;
+  --eds-blue-900: #1e3a8a;
+  --eds-blue-950: #172554;
+
+  /* Gray ramp (neutral) */
+  --eds-gray-50: #f9fafb;
+  --eds-gray-100: #f3f4f6;
+  --eds-gray-200: #e5e7eb;
+  --eds-gray-300: #d1d5db;
+  --eds-gray-400: #9ca3af;
+  --eds-gray-500: #6b7280;
+  --eds-gray-600: #4b5563;
+  --eds-gray-700: #374151;
+  --eds-gray-800: #1f2937;
+  --eds-gray-900: #111827;
+  --eds-gray-950: #030712;
+
+  /* Status ramps (abbreviated — only the stops components need) */
+  --eds-green-50: #f0fdf4;
+  --eds-green-100: #dcfce7;
+  --eds-green-600: #16a34a;
+  --eds-green-700: #15803d;
+  --eds-green-800: #166534;
+
+  --eds-amber-50: #fffbeb;
+  --eds-amber-100: #fef3c7;
+  --eds-amber-600: #d97706;
+  --eds-amber-700: #b45309;
+  --eds-amber-800: #92400e;
+
+  --eds-red-50: #fef2f2;
+  --eds-red-100: #fee2e2;
+  --eds-red-600: #dc2626;
+  --eds-red-700: #b91c1c;
+  --eds-red-800: #991b1b;
+
+  --eds-white: #ffffff;
+
+  /* Spacing — 4px grid */
+  --eds-space-0: 0;
+  --eds-space-1: 4px;
+  --eds-space-2: 8px;
+  --eds-space-3: 12px;
+  --eds-space-4: 16px;
+  --eds-space-5: 20px;
+  --eds-space-6: 24px;
+  --eds-space-8: 32px;
+  --eds-space-10: 40px;
+  --eds-space-12: 48px;
+  --eds-space-16: 64px;
+  --eds-space-20: 80px;
+  --eds-space-24: 96px;
+
+  /* Fluid type scale (mobile -> desktop via clamp) */
+  --eds-text--1: clamp(0.75rem, 0.72rem + 0.15vw, 0.8125rem); /* 12 -> 13 */
+  --eds-text-0: clamp(0.875rem, 0.85rem + 0.15vw, 0.9375rem); /* 14 -> 15 */
+  --eds-text-1: clamp(1rem, 0.97rem + 0.2vw, 1.0625rem); /* 16 -> 17 */
+  --eds-text-2: clamp(1.125rem, 1.08rem + 0.3vw, 1.25rem); /* 18 -> 20 */
+  --eds-text-3: clamp(1.3125rem, 1.22rem + 0.5vw, 1.5rem); /* 21 -> 24 */
+  --eds-text-4: clamp(1.5rem, 1.35rem + 0.8vw, 1.875rem); /* 24 -> 30 */
+  --eds-text-5: clamp(1.75rem, 1.5rem + 1.4vw, 2.375rem); /* 28 -> 38 */
+  --eds-text-6: clamp(2.125rem, 1.75rem + 2vw, 3rem); /* 34 -> 48 */
+
+  /* Font stacks — system only, zero network requests */
+  --eds-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --eds-font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    monospace;
+
+  /* Line heights */
+  --eds-leading-tight: 1.2;
+  --eds-leading-snug: 1.35;
+  --eds-leading-normal: 1.55;
+
+  /* Font weights */
+  --eds-weight-normal: 400;
+  --eds-weight-medium: 500;
+  --eds-weight-semibold: 600;
+  --eds-weight-bold: 700;
+
+  /* Radius */
+  --eds-radius-sm: 6px;
+  --eds-radius-md: 10px;
+  --eds-radius-lg: 14px;
+  --eds-radius-xl: 20px;
+  --eds-radius-full: 9999px;
+
+  /* Shadows (soft, layered, light-theme tuned) */
+  --eds-shadow-sm: 0 1px 2px rgba(17, 24, 39, 0.06);
+  --eds-shadow-md: 0 2px 8px rgba(17, 24, 39, 0.07), 0 1px 2px rgba(17, 24, 39, 0.05);
+  --eds-shadow-lg: 0 8px 24px rgba(17, 24, 39, 0.1), 0 2px 6px rgba(17, 24, 39, 0.06);
+  --eds-shadow-xl: 0 20px 48px rgba(17, 24, 39, 0.16), 0 4px 12px rgba(17, 24, 39, 0.08);
+
+  /* Motion */
+  --eds-duration-fast: 120ms;
+  --eds-duration-base: 180ms;
+  --eds-duration-slow: 280ms;
+  --eds-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --eds-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --eds-ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);
+
+  /* Z-index scale */
+  --eds-z-sticky: 100;
+  --eds-z-dropdown: 200;
+  --eds-z-modal: 300;
+  --eds-z-toast: 400;
+
+  /* Layout */
+  --eds-container: 1180px;
+  --eds-container-narrow: 760px;
+
+  /* Breakpoint reference (cannot be used in @media; documented here):
+     --eds-bp-sm: 600px;  --eds-bp-md: 840px;  --eds-bp-lg: 1200px; */
+
+  /* ------------------------------------------------------------------
+     LAYER 2 — SEMANTIC (the theming API)
+     Override these ~12-16 variables to rebrand a whole project.
+     ------------------------------------------------------------------ */
+
+  /* Brand */
+  --eds-primary: var(--eds-blue-600);
+  --eds-primary-hover: var(--eds-blue-700);
+  --eds-primary-active: var(--eds-blue-800);
+  --eds-primary-fg: var(--eds-white); /* text ON primary */
+  --eds-primary-soft: var(--eds-blue-50); /* tinted backgrounds */
+  --eds-primary-soft-fg: var(--eds-blue-800); /* text on tinted bg */
+
+  /* Surfaces */
+  --eds-bg: var(--eds-white); /* page background */
+  --eds-surface: var(--eds-white); /* cards, panels */
+  --eds-surface-sunken: var(--eds-gray-50); /* wells, alt sections */
+  --eds-surface-raised: var(--eds-white); /* modals, popovers */
+
+  /* Text */
+  --eds-text: var(--eds-gray-900);
+  --eds-text-muted: var(--eds-gray-600);
+  --eds-text-faint: var(--eds-gray-400);
+
+  /* Lines + focus */
+  --eds-border: var(--eds-gray-200);
+  --eds-border-strong: var(--eds-gray-300);
+  --eds-ring: var(--eds-blue-500);
+
+  /* Status */
+  --eds-success: var(--eds-green-600);
+  --eds-success-soft: var(--eds-green-50);
+  --eds-success-soft-fg: var(--eds-green-800);
+  --eds-warning: var(--eds-amber-600);
+  --eds-warning-soft: var(--eds-amber-50);
+  --eds-warning-soft-fg: var(--eds-amber-800);
+  --eds-danger: var(--eds-red-600);
+  --eds-danger-hover: var(--eds-red-700);
+  --eds-danger-soft: var(--eds-red-50);
+  --eds-danger-soft-fg: var(--eds-red-800);
+
+  /* ------------------------------------------------------------------
+     LAYER 3 — COMPONENT KNOBS
+     Tune a single component without forking its CSS.
+     ------------------------------------------------------------------ */
+
+  --eds-btn-height: 44px;
+  --eds-btn-height-sm: 36px;
+  --eds-btn-height-lg: 52px;
+  --eds-btn-radius: var(--eds-radius-md);
+  --eds-btn-px: var(--eds-space-5);
+
+  --eds-field-height: 44px;
+  --eds-field-radius: var(--eds-radius-md);
+
+  --eds-card-pad: var(--eds-space-4);
+  --eds-card-radius: var(--eds-radius-lg);
+
+  --eds-chip-height: 36px;
+
+  --eds-modal-width: 560px;
+  --eds-modal-radius: var(--eds-radius-xl);
+}

@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EDS — Design System Style Guide</title>
+<meta name="description" content="Interactive style guide for EDS: tokens, components, utilities, and live theming. Rendered live from dist/eds.css and dist/eds.js." />
+<link rel="stylesheet" href="dist/eds.css" />
+<style>
+  /* ---- Style guide chrome (scoped, NOT part of the library) ---- */
+  .sg-layout { display: flex; min-height: 100vh; }
+  .sg-sidebar {
+    width: 232px; flex-shrink: 0; border-right: 1px solid var(--eds-border);
+    background: var(--eds-surface-sunken); position: sticky; top: 0; height: 100vh;
+    overflow-y: auto; padding: var(--eds-space-6) var(--eds-space-4);
+    display: none;
+  }
+  @media (min-width: 900px) { .sg-sidebar { display: block; } }
+  .sg-sidebar nav { display: flex; flex-direction: column; gap: 2px; }
+  .sg-sidebar nav a {
+    display: block; padding: 5px 10px; border-radius: var(--eds-radius-sm);
+    color: var(--eds-text-muted); text-decoration: none; font-size: var(--eds-text-0);
+  }
+  .sg-sidebar nav a:hover { background: var(--eds-gray-100); color: var(--eds-text); }
+  .sg-nav-group { margin: var(--eds-space-4) 0 2px; font-size: var(--eds-text--1); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--eds-text-faint); padding: 0 10px; }
+  .sg-main { flex: 1; min-width: 0; padding: var(--eds-space-8) var(--eds-space-4) var(--eds-space-16); }
+  @media (min-width: 900px) { .sg-main { padding: var(--eds-space-10) var(--eds-space-10) var(--eds-space-16); } }
+  .sg-main > section, .sg-main > header, .sg-main > footer { max-width: 960px; margin: 0 auto var(--eds-space-16); scroll-margin-top: var(--eds-space-6); }
+  .sg-section-title { font-size: var(--eds-text-4); font-weight: 700; letter-spacing: -0.02em; margin: 0 0 var(--eds-space-2); }
+  .sg-section-desc { color: var(--eds-text-muted); margin: 0 0 var(--eds-space-6); max-width: 68ch; line-height: var(--eds-leading-normal); }
+  .sg-h3 { font-size: var(--eds-text-1); font-weight: 600; margin: var(--eds-space-6) 0 var(--eds-space-3); }
+  .sg-code { font-family: var(--eds-font-mono); font-size: 0.88em; background: var(--eds-gray-100); padding: 2px 6px; border-radius: 4px; }
+
+  /* Demo blocks */
+  .sg-demo { border: 1px solid var(--eds-border); border-radius: var(--eds-radius-lg); overflow: hidden; margin-bottom: var(--eds-space-8); background: var(--eds-bg); }
+  .sg-demo-head {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--eds-space-3);
+    padding: var(--eds-space-3) var(--eds-space-4); border-bottom: 1px solid var(--eds-border);
+    background: var(--eds-surface-sunken);
+  }
+  .sg-demo-title { font-size: var(--eds-text-0); font-weight: 600; margin: 0; }
+  .sg-demo-canvas { padding: var(--eds-space-6) var(--eds-space-4); transition: max-width 0.25s ease; margin: 0 auto; width: 100%; }
+  .sg-demo-canvas[data-width="mobile"] { max-width: 375px; }
+  .sg-demo-canvas[data-width="tablet"] { max-width: 768px; }
+  .sg-demo-canvas[data-width="desktop"] { max-width: none; }
+  .sg-demo-code { display: none; border-top: 1px solid var(--eds-border); background: var(--eds-gray-900); }
+  .sg-demo-code.is-open { display: block; }
+  .sg-demo-code pre { margin: 0; padding: var(--eds-space-4); overflow-x: auto; font-size: 13px; line-height: 1.55; color: var(--eds-gray-200); font-family: var(--eds-font-mono); }
+  .sg-demo-actions { display: flex; gap: var(--eds-space-2); align-items: center; }
+  .sg-viewport-btns { display: none; gap: 2px; }
+  @media (min-width: 640px) { .sg-viewport-btns { display: inline-flex; } }
+  .sg-viewport-btns button, .sg-chipbtn {
+    font-size: var(--eds-text--1); padding: 4px 10px; border-radius: var(--eds-radius-sm);
+    border: 1px solid var(--eds-border-strong); background: var(--eds-bg); color: var(--eds-text-muted);
+    cursor: pointer; font-family: inherit;
+  }
+  .sg-viewport-btns button[aria-pressed="true"] { background: var(--eds-primary); color: var(--eds-primary-fg); border-color: var(--eds-primary); }
+  .sg-chipbtn:hover { color: var(--eds-text); border-color: var(--eds-gray-400); }
+
+  /* Token swatches */
+  .sg-swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--eds-space-3); }
+  .sg-swatch { border: 1px solid var(--eds-border); border-radius: var(--eds-radius-md); overflow: hidden; cursor: pointer; background: var(--eds-bg); text-align: left; padding: 0; font-family: inherit; }
+  .sg-swatch:hover { border-color: var(--eds-gray-400); }
+  .sg-swatch-color { display: block; height: 52px; border-bottom: 1px solid var(--eds-border); }
+  .sg-swatch-meta { display: block; padding: var(--eds-space-2) var(--eds-space-3); }
+  .sg-swatch-name { font-size: var(--eds-text--1); font-family: var(--eds-font-mono); color: var(--eds-text); display: block; word-break: break-all; }
+  .sg-swatch-value { font-size: var(--eds-text--1); color: var(--eds-text-faint); font-family: var(--eds-font-mono); }
+
+  /* Type / spacing scales */
+  .sg-type-row { display: flex; align-items: baseline; gap: var(--eds-space-4); padding: var(--eds-space-3) 0; border-bottom: 1px solid var(--eds-border); flex-wrap: wrap; }
+  .sg-scale-label { font-size: var(--eds-text--1); font-family: var(--eds-font-mono); color: var(--eds-text-faint); width: 170px; flex-shrink: 0; }
+  .sg-space-row { display: flex; align-items: center; gap: var(--eds-space-4); padding: var(--eds-space-1) 0; }
+  .sg-space-bar { height: 14px; background: var(--eds-primary); border-radius: 2px; }
+
+  /* Radius / shadow tiles */
+  .sg-tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: var(--eds-space-4); }
+  .sg-tile { background: var(--eds-bg); border: 1px solid var(--eds-border); border-radius: var(--eds-radius-md); padding: var(--eds-space-4); text-align: center; font-size: var(--eds-text--1); font-family: var(--eds-font-mono); color: var(--eds-text-muted); }
+
+  /* Search + hidden state */
+  .sg-search-wrap { position: sticky; top: 0; z-index: 50; background: var(--eds-bg); padding: var(--eds-space-3) 0; border-bottom: 1px solid var(--eds-border); }
+  .sg-hidden { display: none !important; }
+
+  /* Theming panel */
+  .sg-theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: var(--eds-space-4); align-items: end; }
+  .sg-theme-field label { display: block; font-size: var(--eds-text-0); font-weight: 500; margin-bottom: var(--eds-space-1); }
+  .sg-theme-field input[type="color"] { width: 100%; height: 40px; border: 1px solid var(--eds-border-strong); border-radius: var(--eds-radius-sm); background: var(--eds-bg); padding: 2px; cursor: pointer; }
+
+  .sg-copied-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(8px); background: var(--eds-gray-900); color: var(--eds-white); font-size: var(--eds-text-0); padding: 8px 16px; border-radius: var(--eds-radius-md); opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; z-index: 500; }
+  .sg-copied-toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body class="eds">
+
+<div class="sg-layout">
+  <!-- ============ Sidebar ============ -->
+  <aside class="sg-sidebar" aria-label="Style guide navigation">
+    <p style="font-weight:700; font-size: var(--eds-text-2); margin: 0 0 2px;">EDS</p>
+    <p style="font-size: var(--eds-text--1); color: var(--eds-text-faint); margin: 0 0 var(--eds-space-3);">Drop-in design system · v2</p>
+    <nav>
+      <span class="sg-nav-group">Foundations</span>
+      <a href="#colors">Colors</a>
+      <a href="#typography">Typography</a>
+      <a href="#spacing">Spacing</a>
+      <a href="#radius-shadows">Radius &amp; Shadows</a>
+      <a href="#theming">Live Theming</a>
+      <span class="sg-nav-group">Components</span>
+      <a href="#buttons">Buttons</a>
+      <a href="#badges">Badges &amp; Trust</a>
+      <a href="#cards">Cards</a>
+      <a href="#product">Product Cards</a>
+      <a href="#chips">Chips &amp; Tiles</a>
+      <a href="#forms">Forms</a>
+      <a href="#search-filter">Search &amp; Filter</a>
+      <a href="#tabs">Tabs</a>
+      <a href="#accordion">Accordion</a>
+      <a href="#modal">Modal</a>
+      <a href="#toast">Toast</a>
+      <a href="#menu">Menu</a>
+      <a href="#notices">Notices</a>
+      <a href="#table">Table</a>
+      <a href="#pagination">Pagination &amp; Crumbs</a>
+      <a href="#avatar-stat">Avatar &amp; Stat</a>
+      <a href="#qty">Quantity Stepper</a>
+      <a href="#skeleton">Skeletons</a>
+      <a href="#copy-submit">Copy &amp; Submit Guard</a>
+      <a href="#sticky-cta">Sticky CTA</a>
+      <span class="sg-nav-group">Utilities</span>
+      <a href="#utilities">Layout Utilities</a>
+    </nav>
+  </aside>
+
+  <!-- ============ Main ============ -->
+  <main class="sg-main">
+    <header>
+      <h1 style="font-size: var(--eds-text-5); font-weight: 700; letter-spacing: -0.02em; margin: 0 0 var(--eds-space-2);">EDS Style Guide</h1>
+      <p class="sg-section-desc" style="margin-bottom: var(--eds-space-4);">
+        A zero-dependency, drop-in design system for Elementor, WordPress, and any HTML site.
+        Load <span class="sg-code">dist/eds.css</span> in the head and <span class="sg-code">dist/eds.js</span> before <span class="sg-code">&lt;/body&gt;</span> — done.
+        Everything on this page is rendered live from those two files.
+      </p>
+      <div class="sg-search-wrap">
+        <input type="search" id="sg-search" class="eds-input" placeholder="Search tokens and components… (e.g. button, shadow, tabs)" aria-label="Search style guide" style="max-width: 480px;" />
+      </div>
+    </header>
+
+    <!-- ============ COLORS ============ -->
+    <section id="colors" data-search="colors tokens palette primary gray semantic success warning danger surface border ring">
+      <h2 class="sg-section-title">Colors</h2>
+      <p class="sg-section-desc">Three layers: primitives (<span class="sg-code">--eds-blue-600</span>) feed semantic roles (<span class="sg-code">--eds-primary</span>) which feed component knobs. Build only with semantic roles; rebrand by overriding them. Click any swatch to copy its variable.</p>
+      <h3 class="sg-h3" style="margin-top:0;">Semantic roles (the theming API)</h3>
+      <div class="sg-swatch-grid" id="sg-semantic-swatches"></div>
+      <h3 class="sg-h3">Primitives</h3>
+      <div class="sg-swatch-grid" id="sg-primitive-swatches"></div>
+    </section>
+
+    <!-- ============ TYPOGRAPHY ============ -->
+    <section id="typography" data-search="typography type scale font heading text size fluid clamp">
+      <h2 class="sg-section-title">Typography</h2>
+      <p class="sg-section-desc">System font stack — zero network requests. The scale is fluid (<span class="sg-code">clamp()</span>): each step grows slightly from mobile to desktop. Override <span class="sg-code">--eds-font-sans</span> to match a brand font.</p>
+      <div id="sg-type-scale"></div>
+    </section>
+
+    <!-- ============ SPACING ============ -->
+    <section id="spacing" data-search="spacing scale margin padding gap space grid 4px">
+      <h2 class="sg-section-title">Spacing</h2>
+      <p class="sg-section-desc">A 4px grid. Use with utilities (<span class="sg-code">eds-stack-4</span>, <span class="sg-code">eds-row-3</span>, <span class="sg-code">eds-mt-6</span>, <span class="sg-code">eds-p-4</span>) or directly as <span class="sg-code">var(--eds-space-N)</span>.</p>
+      <div id="sg-space-scale"></div>
+    </section>
+
+    <!-- ============ RADIUS & SHADOWS ============ -->
+    <section id="radius-shadows" data-search="radius border-radius shadow elevation">
+      <h2 class="sg-section-title">Radius &amp; Shadows</h2>
+      <div class="eds-grid-2" style="gap: var(--eds-space-8);">
+        <div>
+          <h3 class="sg-h3" style="margin-top:0;">Radius</h3>
+          <div class="sg-tile-grid" id="sg-radius-tiles"></div>
+        </div>
+        <div>
+          <h3 class="sg-h3" style="margin-top:0;">Shadows</h3>
+          <div class="sg-tile-grid" id="sg-shadow-tiles"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ THEMING ============ -->
+    <section id="theming" data-search="theming theme brand rebrand override customize primary ring">
+      <h2 class="sg-section-title">Live Theming</h2>
+      <p class="sg-section-desc">The whole system rebrands from a handful of semantic variables. Change them below — every component on this page updates instantly — then copy the generated override block and paste it after <span class="sg-code">eds.css</span> in your project.</p>
+      <div class="sg-demo">
+        <div class="sg-demo-canvas" data-width="desktop">
+          <div class="sg-theme-grid">
+            <div class="sg-theme-field"><label for="th-primary">Primary</label><input type="color" id="th-primary" value="#2563eb" data-var="--eds-primary" /></div>
+            <div class="sg-theme-field"><label for="th-primary-hover">Primary hover</label><input type="color" id="th-primary-hover" value="#1d4ed8" data-var="--eds-primary-hover" /></div>
+            <div class="sg-theme-field"><label for="th-ring">Focus ring</label><input type="color" id="th-ring" value="#3b82f6" data-var="--eds-ring" /></div>
+            <div class="sg-theme-field"><label for="th-text">Text</label><input type="color" id="th-text" value="#111827" data-var="--eds-text" /></div>
+            <div class="sg-theme-field">
+              <label for="th-radius">Radius scale: <span id="th-radius-out">1×</span></label>
+              <input type="range" id="th-radius" min="0" max="2" step="0.25" value="1" style="width:100%;" />
+            </div>
+            <div class="eds-row-2">
+              <button class="eds-btn eds-btn--secondary eds-btn--sm" id="th-reset" type="button">Reset</button>
+              <button class="eds-btn eds-btn--primary eds-btn--sm" id="th-copy" type="button">Copy override CSS</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ BUTTONS ============ -->
+    <section id="buttons" data-search="buttons btn primary secondary ghost danger loading disabled sizes">
+      <h2 class="sg-section-title">Buttons</h2>
+      <p class="sg-section-desc">Base class <span class="sg-code">.eds-btn</span> plus one variant modifier. Real <span class="sg-code">&lt;button&gt;</span> / <span class="sg-code">&lt;a&gt;</span> elements, 44px minimum height, visible focus, press feedback.</p>
+      <div class="sg-demo" data-demo>
+        <div class="sg-demo-head">
+          <p class="sg-demo-title">Variants, sizes &amp; states</p>
+          <div class="sg-demo-actions">
+            <span class="sg-viewport-btns" role="group" aria-label="Preview width">
+              <button type="button" data-vw="mobile" aria-pressed="false">SM</button>
+              <button type="button" data-vw="tablet" aria-pressed="false">MD</button>
+              <button type="button" data-vw="desktop" aria-pressed="true">LG</button>
+            </span>
+            <button type="button" class="sg-chipbtn" data-toggle-code>Code</button>
+            <button type="button" class="sg-chipbtn" data-copy-code>Copy</button>
+          </div>
+        </div>
+        <div class="sg-demo-canvas" data-width="desktop">
+          <div class="eds-row-3">
+            <button class="eds-btn eds-btn--primary" type="button">Primary</button>
+            <button class="eds-btn eds-btn--secondary" type="button">Secondary</button>
+            <button class="eds-btn eds-btn--ghost" type="button">Ghost</button>
+            <button class="eds-btn eds-btn--danger" type="button">Danger</button>
+          </div>
+          <div class="eds-row-3 eds-mt-4">
+            <button class="eds-btn eds-btn--primary eds-btn--sm" type="button">Small</button>
+            <button class="eds-btn eds-btn--primary" type="button">Default</button>
+            <button class="eds-btn eds-btn--primary eds-btn--lg" type="button">Large</button>
+            <button class="eds-btn eds-btn--primary" type="button" disabled>Disabled</button>
+            <button class="eds-btn eds-btn--primary eds-btn--loading" type="button">Loading</button>
+          </div>
+        </div>
+        <div class="sg-demo-code"><pre></pre></div>
+      </div>
+    </section>
+
+    <!-- ============ BADGES ============ -->
+    <section id="badges" data-search="badges chips tags pills status trust chip verified secure delivery">
+      <h2 class="sg-section-title">Badges &amp; Trust Chips</h2>
+      <div class="sg-demo" data-demo>
+        <div class="sg-demo-head">
+          <p class="sg-demo-title">Status badges + trust chips</p>
+          <div class="sg-demo-actions">
+            <button type="button" class="sg-chipbtn" data-toggle-code>Code</button>
+            <button type="button" class="sg-chipbtn" data-copy-code>Copy</button>
+          </div>
+        </div>
+        <div class="sg-demo-canvas" data-width="desktop">
+          <div class="eds-row-3">
+            <span class="eds-badge">Default</span>
+            <span class="eds-badge eds-badge--primary">Primary</span>
+            <span class="eds-badge eds-badge--success">In stock</span>
+            <span class="eds-badge eds-badge--warning">Low stock</span>
+            <span class="eds-badge eds-badge--danger">-20%</span>
+          </div>
+          <div class="eds-row-2 eds-mt-4">
+            <span class="eds-trust-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Instant delivery</span>
+            <span class="eds-trust-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Secure checkout</span>
+            <span class="eds-trust-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Verified products</span>
+          </div>
+        </div>
+        <div class="sg-demo-code"><pre></pre></div>
+      </div>
+    </section>
+
+    <!-- ============ CARDS ============ -->
+    <section id="cards" data-search="cards card interactive flush hover panel">
+      <h2 class="sg-section-title">Cards</h2>
+      <p class="sg-section-desc">Use cards only for repeated items. <span class="sg-code">--interactive</span> adds hover elevation; <span class="sg-code">--flush</span> removes padding for edge-to-edge media.</p>
+      <div class="sg-demo" data-demo>
+        <div class="sg-demo-head">
+          <p class="sg-demo-title">Card variants</p>
+          <div class="sg-demo-actions">
+            <span class="sg-viewport-btns" role="group" aria-label="Preview width">
+              <button type="button" data-vw="mobile" aria-pressed="false">SM</button>
+              <button type="button" data-vw="tablet" aria-pressed="false">MD</button>
+              <button type="button" data-vw="desktop" aria-pressed="true">LG</button>
+            </span>
+            <button type="button" class="sg-chipbtn" data-toggle-code>Code</button>
+            <button type="button" class="sg-chipbtn" data-copy-code>Copy</button>
+          </div>
+        </div>
+        <div class="sg-demo-canvas" data-width="desktop">
+          <div class="eds-grid-3">
+            <article class="eds-card">
+              <div class="eds-stack-2">
+                <h3 style="font-size: var(--eds-text-1); font-weight: 600; margin: 0;">Basic card</h3>
+                <p class="eds-text-muted" style="margin:0;">Border, padding, radius. The default container for grouped content.</p>
+              </div>
+            </article>
+            <article class="eds-card eds-card--interactive">
+              <div class="eds-stack-2">
+                <h3 style="font-size: var(--eds-text-1); font-weight: 600; margin: 0;">Interactive card</h3>
+                <p class="eds-text-muted" style="margin:0;">Lifts on hover. Use for clickable cards and link grids.</p>
+              </div>
+            </article>
+            <article class="eds-card">
+              <div class="eds-stack-2">
+                <span class="eds-badge eds-badge--primary" style="align-self:flex-start;">Pro</span>
+                <p class="eds-price" style="margin:0;">$29<span class="eds-text-muted eds-text-sm" style="font-weight:400;">/mo</span></p>
+                <p class="eds-text-muted" style="margin:0;">Pricing card composed from badge + price + button.</p>
+                <button class="eds-btn eds-btn--primary eds-btn--full eds-mt-2" type="button">Choose plan</button>
+              </div>
+            </article>
+          </div>
+        </div>
+        <div class="sg-demo-code"><pre></pre></div>
+      </div>
+    </section>
+
+    <!-- ============ PRODUCT CARDS ============ -->
+    <section id="product" data-search="product card commerce price row list ecommerce shop media">
+      <h2 class="sg-section-title">Product Cards</h2>
+      <p class="sg-section-desc">Commerce-ready: reserved 4:3 media area (no layout shift), title, meta, price with optional strikethrough, one action. <span class="sg-code">.eds-product-row</span> is the dense horizontal variant.</p>
+      <div class="sg-demo" data-demo>
+        <div class="sg-demo-head">
+          <p class="sg-demo-title">Product card + product row</p>
+          <div class="sg-demo-actions">
+            <span class="sg-viewport-btns" role="group" aria-label="Preview width">
+              <button type="button" data-vw="mobile" aria-pressed="false">SM</button>
+              <button type="button" data-vw="tablet" aria-pressed="false">MD</button>
+              <button type="button" data-vw="desktop" aria-pressed="true">LG</button>
+            </span>
+            <button type="button" class="sg-chipbtn" data-toggle-code>Code</button>
+            <button type="button" class="sg-chipbtn" data-copy-code>Copy</button>
+          </div>
+        </div>
+        <div class="sg-demo-canvas" data-width="desktop">
+          <div class="eds-grid-3">
+            <article class="eds-product-card">
+              <div class="eds-product-card__media" aria-hidden="true" style="display:flex;align-items:center;justify-content:center;color:var(--eds-text-faint);font-size:var(--eds-text--1);">4:3 media</div>
+              <div class="eds-product-card__body">
+                <span class="eds-badge eds-badge--danger" style="align-self:flex-start;">-20%</span>
+                <h3 class="eds-product-card__title"><a href="#product">$50 Game Gift Card</a></h3>
+                <p class="eds-product-card__meta">Gift cards · Global</p>
+                <div class="eds-product-card__footer">
+                  <p class="eds-price" style="margin:0;"><span class="eds-price__original">$50.00</span>$40.00</p>
+                  <button class="eds-btn eds-btn--primary eds-btn--sm" type="button">Buy</button>
+                </div>
+              </div>
+            </article>
+            <article class="eds-product-card">
+              <div class="eds-product-card__media" aria-hidden="true" style="display:flex;align-items:center;justify-content:center;color:var(--eds-text-faint);font-size:var(--eds-text--1);">4:3 media</div>
+              <div class="eds-product-card__body">
+                <h3 class="eds-product-card__title"><a href="#product">Mobile Top-Up 100</a></h3>
+                <p class="eds-product-card__meta">Top-ups · Instant</p>
+                <div class="eds-product-card__footer">
+                  <p class="eds-price" style="margin:0;">$9.99</p>
+                  <button class="eds-btn eds-btn--primary eds-btn--sm" type="button">Buy</button>
+                </div>
+              </div>
+            </article>
+            <div class="eds-stack-3">
+              <article class="eds-product-row">
+                <div class="eds-product-row__thumb" aria-hidden="true"></div>
+                <div class="eds-product-row__body">
+                  <p style="margin:0;font-weight:600;">Streaming 1 Month</p>
+                  <p class="eds-product-card__meta" style="margin:0;">Subscriptions</p>
+                  <p class="eds-price eds-text-sm" style="margin:0;">$12.99</p>
+                </div>
+                <button class="eds-btn eds-btn--secondary eds-btn--sm" type="button">Add</button>
+              </article>
+              <article class="eds-product-row">
+                <div class="eds-product-row__thumb" aria-hidden="true"></div>
+                <div class="eds-product-row__body">
+                  <p style="margin:0;font-weight:600;">Game Points 5000</p>
+                  <p class="eds-product-card__meta" style="margin:0;">In-game currency</p>
+                  <p class="eds-price eds-text-sm" style="margin:0;">$24.50</p>
+                </div>
+                <button class="eds-btn eds-btn--secondary eds-btn--sm" type="button">Add</button>
+              </article>
+            </div>
+          </div>
+        </div>
+        <div class="sg-demo-code"><pre></pre></div>
+      </div>
+    </section>
+
+    <!-- ============ CHIPS & TILES ============ -->
+    <section id="chips" data-search="chips category tiles scroll filter browse navigation">
+      <h2 class="sg-section-title">Chips &amp; Tiles</h2>
+      <p class="sg-section-desc"><span class="sg-code">.eds-chip-scroll</span> gives horizontal snap-scrolling on mobile. Active chips use <span class="sg-code">aria-pressed="true"</span>. Tiles are tap-friendly category targets.</p>
+      <div class="sg-demo" data-demo>
+        <div class="sg-demo-head">
+          <p class="sg-demo-title">Category chips + tiles</p>
+          <div class="sg-demo-actions">
+            <span class="sg-viewport-btns" role="group" aria-label="Preview width">
+              <button type="button" data-vw="mobile" aria-pressed="false">SM</button>
+              <button type="button" data-vw="tablet" aria-pressed="false">MD</button>
+              <button type="button" data-vw="desktop" aria-pressed="true">LG</button>
+            </span>
+            <button type="button" class="sg-chipbtn" data-toggle-code>Code</button>
+            <button type="button" class="sg-chipbtn" data-copy-code>Copy</button>
+          </div>
+        </div>
+        <div class="sg-demo-canvas" data-width="desktop">
+          <div class="eds-chip-scroll">
+            <button class="eds-chip" aria-pressed="true" type="button">All</button>
+            <button class="eds-chip" aria-pressed="false" type="button">Gift cards</button>
+            <button class="eds-chip" aria-pressed="false" type="button">Top-ups</button>
+            <button class="eds-chip" aria-pressed="false" type="button">Subscriptions</button>
+            <button class="eds-chip" aria-pressed="false" type="button">Games</button>
+          </div>
+          <div class="eds-grid-4 eds-mt-4">
+            <a class="eds-tile" href="#chips"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>Gift cards</a>
+            <a class="eds-tile" href="#chips"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>Top-ups</a>
+            <a class="eds-tile" href="#chips"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Subscriptions</a>
+            <a class="eds-tile" href="#chips"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 12h4m-2-2v4"/><rect x="2" y="6" width="20" height="12" rx="3"/><path d="M16 11h.01M18 13h.01"/></svg>Games</a>
+          </div>
+        </div>
+        <div class="sg-demo-code"><pre></pre></div>
+      </div>
+    </section>
+
+    <!-- ============ FORMS ============ -->
+    <section id="forms" data-search="forms input select textarea checkbox radio label validation error helper field">
+      <h2 class="sg-section-title">Forms</h2>
+      <p class="sg-section-desc">Every input gets a visible label. Errors: add <span class="sg-code">.eds-field--error</span> to the wrapper and <span class="sg-code">aria-invalid</span> to the input. 16px input font prevents iOS zoom.</p>
+      <div class="sg-demo" data-demo>
+        <div class="sg-demo-head">
+          <p class="sg-demo-title">Fields, states &amp; controls</p>
+          <div class="sg-demo-actions">
+            <span class="sg-viewport-btns" role="group" aria-label="Preview width">
+              <button type="button" data-vw="mobile" aria-pressed="false">SM</button>
+              <button type="button" data-vw="tablet" aria-pressed="false">MD</button>
+              <button type="button" data-vw="desktop" aria-pressed="true">LG</button>
+            </span>
+            <button type="button" class="sg-chipbtn" data-toggle-code>Code</button>
+            <button type="button" class="sg-chipbtn" data-copy-code>Copy</button>
+          </div>
+        </div>
+        <div class="sg-demo-canvas" data-width="desktop">
+          <div class="eds-grid-2">
+            <div class="eds-field">
+              <label class="eds-field__label" for="f-name">Full name</label>
+              <input class="eds-input" id="f-name" type="text" autocomplete="name" placeholder="Jane Doe" />
+              <p class="eds-field__helper">As it appears on your ID.</p>
+            </div>
+            <div class="eds-field eds-field--error">
+              <label class="eds-field__label" for="f-email">Email</label>
+              <input class="eds-input" id="f-email" type="email" value="not-an-email" aria-invalid="true" aria-describedby="f-email-err" />
+              <p class="eds-field__error" id="f-email-err" role="alert">Enter a valid email address.</p>
+            </div>
+            <div class="eds-field">
+              <label class="eds-field__label" for="f-topic">Topic</label>
+              <select class="eds-select" id="f-topic">
+                <option>General inquiry</option>
+                <option>Support</option>
+                <option>Sales</option>
+              </select>
+            </div>
+            <div class="eds-field">
+              <label class="eds-field__label" for="f-msg">Message</label>
+              <textarea class="eds-textarea" id="f-msg" placeholder="How can we help?"></textarea>
+            </div>
+            <div>
+              <label class="eds-check"><input type="checkbox" checked /> <span>Subscribe to product updates</span></label>
+              <label class="eds-check"><input type="radio" name="plan" checked /> <span>Monthly billing</span></label>
+              <label class="eds-check"><input type="radio" name="plan" /> <span>Annual billing (save 20%)</span></label>
+            </div>
+            <div class="eds-field">
+              <label class="eds-field__label" for="f-disabled">Disabled field</label>
+              <input class="eds-input" id="f-disabled" type="text" value="Read only value" disabled />
+            </div>
+          </div>
+        </div>
+        <div class="sg-demo-code"><pre></pre></div>
+      </div>
+    </section>
+
+    <!-- ============ SEARCH & FILTER ============ -->
+    <section id="search-filter" data-search="search filter debounce chips live results empty state">
+      <h2 class="sg-section-title">Search &amp; Filter</h2>
+      <p class="sg-section-desc">Both are live demos wired by <span class="sg-code">eds.js</span>: <span class="sg-code">data-eds-search</span> debounce-filters a list; <span class="sg-code">data-eds-filter</span> chips toggle items by <span class="sg-code">data-eds-category</span>. Try typing or clicking.</p>
+      <div class="sg-demo" data-demo>
+        <div class="sg-demo-head">
+          <p class="sg-demo-title">Live search + category filter</p>
+          <div class="sg-demo-actions">
+            <button type="button" class="sg-chipbtn" data-toggle-code>Code</button>
+            <button type="button" class="sg-chipbtn" data-copy-code>Copy</button>
+          </div>
+        </div>
+        <div class="sg-demo-canvas" data-width="desktop">
+          <div class="eds-search" style="max-width: 420px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input class="eds-input" type="search" data-eds-search data-eds-search-target="#sg-demo-list" data-eds-search-empty="#sg-demo-empty" placeholder="Search products…" aria-label="Search products" />
+          </div>
+          <div data-eds-filter data-eds-filter-target="#sg-demo-list" class="eds-row-2 eds-mt-4">
+            <button class="eds-chip" aria-pressed="true" data-eds-filter-value="all" type="button">All</button>
+            <button class="eds-chip" aria-pressed="false" data-eds-filter-value="gift" type="button">Gift cards</button>
+            <button class="eds-chip" aria-pressed="false" data-eds-filter-value="topup" type="button">Top-ups</button>
+          </div>
+          <div id="sg-demo-list" class="eds-stack-3 eds-mt-4">
+            <article class="eds-product-row" data-eds-category="gift" data-eds-search-text="game gift card">
+              <div class="eds-product-row__thumb" aria-hidden="true"></div>
+              <div class="eds-product-row__body"><p style="margin:0;font-weight:600;">Game Gift Card</p><p class="eds-text-muted eds-text-xs" style="margin:0;">Gift cards</p></div>
+              <p class="eds-price eds-text-sm" style="margin:0;">$25.00</p>
+            </article>
+            <article class="eds-product-row" data-eds-category="topup" data-eds-search-text="mobile top-up">
+              <div class="eds-product-row__thumb" aria-hidden="true"></div>
+              <div class="eds-product-row__body"><p style="margin:0;font-weight:600;">Mobile Top-Up</p><p class="eds-text-muted eds-text-xs" style="margin:0;">Top-ups</p></div>
+              <p class="eds-price eds-text-sm" style="margin:0;">$9.99</p>
+            </article>
+            <article class="eds-product-row" data-eds-category="gift" data-eds-search-text="streaming gift card">
+              <div class="eds-product-row__thumb" aria-hidden="true"></div>
+              <div class="eds-product-row__body"><p style="margin:0;font-weight:600;">Streaming Gift Card</p><p class="eds-text-muted eds-text-xs" style="margin:0;">Gift cards</p></div>
+              <p class="eds-price eds-text-sm" style="margin:0;">$15.00</p>
+            </article>
+          </div>
+          <div id="sg-demo-empty" class="eds-notice eds-mt-4" hidden>
+            <p style="margin:0;">No products match your search. Try a different term.</p>
+          </div>
+        </div>
+        <div class="sg-demo-code"><pre></pre></div>
+      </div>
+    </section>
+
+    <!-- ============ TABS ============ -->
+    <section id="tabs" data-search="tabs tablist panel switch keyboard arrows">
+      <h2 class="sg-section-title">Tabs</h2>
+      <p class="sg-section-desc">Keyboard-accessible (arrow keys, Home/End) via <span class="sg-code">data-eds-tabs</span>. Underline treatment marks the selected tab; the list scrolls horizontally on small screens.</p>
+      <div class="sg-demo" data-demo>
+        <div class="sg-demo-head">
+          <p class="sg-demo-title">Tabs</p>
+          <div class="sg-demo-actions">
+            <button type="button" class="sg-chipbtn" data-toggle-code>Code</button>
+            <button type="button" class="sg-chipbtn" data-copy-code>Copy</button>
+          </div>
+        </div>
+        <div class="sg-demo-canvas" data-width="desktop">
+          <div data-eds-tabs>
+            <div class="eds-tabs__list" role="tablist" aria-label="Product information">
+              <button class="eds-tabs__tab" role="tab" id="tab-desc" aria-controls="panel-desc" aria-selected="true" type="button">Description</button>
+              <button class="eds-tabs__tab" role="tab" id="tab-details" aria-controls="panel-details" type="button">Details</button>
+              <button class="eds-tabs__tab" role="tab" id="tab-reviews" aria-controls="panel-reviews" type="button">Reviews</button>
+            </div>
+            <div class="eds-tabs__panel" role="tabpanel" id="panel-desc" aria-labelledby="tab-desc">
+              <p style="margin:0;">Description panel. Use tabs to split dense product content into scannable views.</p>
+            </div>
+            <div class="eds-tabs__panel" role="tabpanel" id="panel-details" aria-labelledby="tab-details" hidden>
+              <p style="margin:0;">Details panel content.</p>
+            </div>
+            <div class="eds-tabs__panel" role="tabpanel" id="panel-reviews" aria-labelledby="tab-reviews" hidden>
+              <p style="margin:0;">Reviews panel content.</p>
+            </div>
+          </div>
+        </div>
+        <div class="sg-demo-code"><pre></pre></div>
+      </div>
+    </section>
+
+    <!-- ============ ACCORDION ============ -->
+    <section id="accordion" data-search="accordion faq details disclosure collapse summary">
+      <h2 class="sg-section-title">Accordion</h2>
+      <p class="sg-section-desc">Native <span class="sg-code">&lt;details&gt;</span>/<span class="sg-code">&lt;summary&gt;</span> — content works and stays crawlable without JS. <span class="sg-code">eds.js</span> adds a transform/opacity entrance on open.</p>
+      <div class="sg-demo" data-demo>
+        <div class="sg-demo-head">
+          <p class="sg-demo-title">FAQ accordion</p>
+          <div class="sg-demo-actions">
+            <button type="button" class="sg-chipbtn" data-toggle-code>Code</button>
+            <button type="button" class="sg-chipbtn" data-copy-code>Copy</button>
+          </div>
+        </div>
+        <div class="sg-demo-canvas" data-width="desktop">
+          <details class="eds-accordion" open>
+            <summary>Does this work without JavaScript?</summary>
+            <div class="eds-accordion__body">Yes — it&apos;s built on native <code>&lt;details&gt;</code>, so content stays accessible and SEO-crawlable even if the script never loads.</div>
+          </details>
+          <details class="eds-accordion">
+            <summary>Can I use it inside Elementor?</summary>
+            <div class="eds-accordion__body">Yes. Paste the markup into an HTML widget; the stylesheet handles the rest.</div>
+          </details>
+          <details class="eds-accordion">
+            <summary>How do I change the open indicator?</summary>
+            <div class="eds-accordion__body">The chevron is a CSS-only pseudo-element on the summary — restyle <code>.eds-accordion summary::after</code>.</div>
+          </details>
+        </div>
+        <div class="sg-demo-code"><pre></pre></div>
+      </div>
+    </section>
+
+    <!-- ============ MODAL ============ -->
+    <section id="modal" data-search="modal dialog overlay popup sheet bottom">
+      <h2 class="sg-section-title">Modal</h2>
+      <p class="sg-section-desc">Native <span class="sg-code">&lt;dialog&gt;</span>: focus trapping, Escape, and backdrop come free. Trigger with <span class="sg-code">data-eds-modal="id"</span> or <span class="sg-code">EDS.openModal(&apos;id&apos;)</span>. Add <span class="sg-code">.eds-modal--sheet</span> for a mobile bottom sheet.</p>
+      <div class="sg-demo" data-demo>
+        <div class="sg-demo-head">
+          <p class="sg-demo-title">Dialog</p>
+          <div class="sg-demo-actions">
+            <button type="button" class="sg-chipbtn" data-toggle-code>Code</button>
+            <button type="button" class="sg-chipbtn" data-copy-code>Copy</button>
+          </div>
+        </div>
+        <div class="sg-demo-canvas" data-width="desktop">
+          <button class="eds-btn eds-btn--primary" type="button" data-eds-modal="demo-modal">Open modal</button>
+          <dialog class="eds-modal" id="demo-modal" aria-labelledby="demo-modal-title">
+            <div class="eds-modal__header">
+              <h3 class="eds-modal__title" id="demo-modal-title" style="margin:0;">Confirm action</h3>
+              <button class="eds-modal__close" type="button" data-eds-modal-close aria-label="Close dialog">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="eds-modal__body">
+              <p style="margin:0;">This is a native <code>&lt;dialog&gt;</code>. Press Escape or click the backdrop to dismiss.</p>
+            </div>
+            <div class="eds-modal__footer">
+              <button class="eds-btn eds-btn--secondary" type="button" data-eds-modal-close>Cancel</button>
+              <button class="eds-btn eds-btn--primary" type="button" data-eds-modal-close>Confirm</button>
+            </div>
+          </dialog>
+        </div>
+        <div class="sg-demo-code"><pre></pre></div>
+      </div>
+    </section>
+
+    <!-- ============ TOAST ============ -->
+    <section id="toast" data-search="toast notification snackbar transient auto dismiss aria-live">
+      <h2 class="sg-section-title">Toast</h2>
+      <p class="sg-section-desc">Programmatic: <span class="sg-code">EDS.toast(message, type)</span> with type <span class="sg-code">success | danger | info</span>. Declarative: <span class="sg-code">data-eds-toast</span> on any button. Announced politely to screen readers, auto-dismissed after 4s.</p>
+      <div class="sg-demo" data-demo>
+        <div class="sg-demo-head">
+          <p class="sg-demo-title">EDS.toast()</p>
+          <div class="sg-demo-actions">
+            <button type="button" class="sg-chipbtn" data-toggle-code>Code</button>
+            <button type="button" class="sg-chipbtn" data-copy-code>Copy</button>
+          </div>
+        </div>
+        <div class="sg-demo-canvas" data-width="desktop">
+          <div class="eds-row-3">
+            <button class="eds-btn eds-btn--secondary" type="button" data-eds-toast="Added to cart" data-eds-toast-type="success">Success toast</button>
+            <button class="eds-btn eds-btn--secondary" type="button" data-eds-toast="Payment failed — try again" data-eds-toast-type="danger">Error toast</button>
+            <button class="eds-btn eds-btn--secondary" type="button" data-eds-toast="A new version is available" data-eds-toast-type="info">Info toast</button>
+            <button class="eds-btn eds-btn--secondary" type="button" data-eds-toast="Settings saved">Neutral toast</button>
+          </div>
+        </div>
+        <div class="sg-demo-code"><pre></pre></div>
+      </div>
+    </section>
+
+    <!-- ============ MENU ============ -->
+    <section id="menu" data-search="menu dropdown popover actions overflow">
+      <h2 class="sg-section-title">Menu</h2>
+      <p class="sg-section-desc">Dropdown via <span class="sg-code">data-eds-menu</span>: outside click and Escape close it, and choosing an item closes it too. Add <span class="sg-code">.eds-menu--end</span> to right-align the panel.</p>
+      <div class="sg-demo" data-demo>
+        <div class="sg-demo-head">
+          <p class="sg-demo-title">Dropdown menu</p>
+          <div class="sg-demo-actions">
+            <button type="button" class="sg-chipbtn" data-toggle-code>Code</button>
+            <button type="button" class="sg-chipbtn" data-copy-code>Copy</button>
+          </div>
+        </div>
+        <div class="sg-demo-canvas" data-width="desktop" style="min-height: 240px;">
+          <div class="eds-menu" data-eds-menu>
+            <button class="eds-btn eds-btn--secondary" type="button" aria-expanded="false">Options ▾</button>
+            <div class="eds-menu__panel" hidden>
+              <button class="eds-menu__item" type="button">Edit</button>
+              <button class="eds-menu__item" type="button">Duplicate</button>
+              <hr class="eds-divider" style="margin: var(--eds-space-1) 0;" />
+              <button class="eds-menu__item eds-menu__item--danger" type="button">Delete</button>
+            </div>
+          </div>
+        </div>
+        <div class="sg-demo-code"><pre></pre></div>
+      </div>
+    </section>
+
+    <!-- ============ NOTICES ============ -->
+    <section id="notices" data-search="notices alerts banner message inline info success warning danger">
+      <h2 class="sg-section-title">Notices</h2>
+      <p class="sg-section-desc">Inline messages tied to the current form or state. Use <span class="sg-code">role="status"</span> for passive info and <span class="sg-code">role="alert"</span> for errors.</p>
+      <div class="sg-demo" data-demo>
+        <div class="sg-demo-head">
+          <p class="sg-demo-title">Inline notices</p>
+          <div class="sg-demo-actions">
+            <button type="button" class="sg-chipbtn" data-toggle-code>Code</button>
+            <button type="button" class="sg-chipbtn" data-copy-code>Copy</button>
+          </div>
+        </div>
+        <div class="sg-demo-canvas" data-width="desktop">
+          <div class="eds-stack-3">
+            <div class="eds-notice" role="status"><p style="margin:0;"><strong>Neutral.</strong> Order history is available in your account.</p></div>
+            <div class="eds-notice eds-notice--info" role="status"><p style="margin:0;"><strong>Info.</strong> A new version is available.</p></div>
+            <div class="eds-notice eds-notice--success" role="status"><p style="margin:0;"><strong>Success.</strong> Your changes were saved.</p></div>
+            <div class="eds-notice eds-notice--warning" role="status"><p style="margin:0;"><strong>Warning.</strong> Your trial ends in 3 days.</p></div>
+            <div class="eds-notice eds-notice--danger" role="alert"><p style="margin:0;"><strong>Error.</strong> Payment could not be processed.</p></div>
+          </div>
+        </div>
+        <div class="sg-demo-code"><pre></pre></div>
+      </div>
+    </section>
+
+    <!-- ============ TABLE ============ -->
+    <section id="table" data-search="table data rows columns responsive stack mobile definition">
+      <h2 class="sg-section-title">Table</h2>
+      <p class="sg-section-desc">Below 600px the table stacks into labeled definition rows — add <span class="sg-code">data-label</span> to each cell. Toggle the SM preview to see it.</p>
+      <div class="sg-demo" data-demo>
+        <div class="sg-demo-head">
+          <p class="sg-demo-title">Responsive data table</p>
+          <div class="sg-demo-actions">
+            <span class="sg-viewport-btns" role="group" aria-label="Preview width">
+              <button type="button" data-vw="mobile" aria-pressed="false">SM</button>
+              <button type="button" data-vw="tablet" aria-pressed="false">MD</button>
+              <button type="button" data-vw="desktop" aria-pressed="true">LG</button>
+            </span>
+            <button type="button" class="sg-chipbtn" data-toggle-code>Code</button>
+            <button type="button" class="sg-chipbtn" data-copy-code>Copy</button>
+          </div>
+        </div>
+        <div class="sg-demo-canvas" data-width="desktop">
+          <table class="eds-table">
+            <thead>
+              <tr><th scope="col">Order</th><th scope="col">Product</th><th scope="col">Status</th><th scope="col">Total</th></tr>
+            </thead>
+            <tbody>
+              <tr><td data-label="Order" class="eds-tabular">#10241</td><td data-label="Product">Game Gift Card $50</td><td data-label="Status"><span class="eds-badge eds-badge--success">Delivered</span></td><td data-label="Total" class="eds-tabular">$40.00</td></tr>
+              <tr><td data-label="Order" class="eds-tabular">#10242</td><td data-label="Product">Mobile Top-Up 100</td><td data-label="Status"><span class="eds-badge eds-badge--warning">Pending</span></td><td data-label="Total" class="eds-tabular">$9.99</td></tr>
+              <tr><td data-label="Order" class="eds-tabular">#10243</td><td data-label="Product">Streaming 1 Month</td><td data-label="Status"><span class="eds-badge eds-badge--danger">Failed</span></td><td data-label="Total" class="eds-tabular">$12.99</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="sg-demo-code"><pre></pre></div>
+      </div>
+    </section>
+
+    <!-- ============ PAGINATION & BREADCRUMBS ============ -->
+    <section id="pagination" data-search="pagination pages next previous breadcrumbs trail navigation">
+      <h2 class="sg-section-title">Pagination &amp; Breadcrumbs</h2>
+      <div class="sg-demo" data-demo>
+        <div class="sg-demo-head">
+          <p class="sg-demo-title">Pagination + breadcrumbs</p>
+          <div class="sg-demo-actions">
+            <button type="button" class="sg-chipbtn" data-toggle-code>Code</button>
+            <button type="button" class="sg-chipbtn" data-copy-code>Copy</button>
+          </div>
+        </div>
+        <div class="sg-demo-canvas" data-width="desktop">
+          <nav aria-label="Breadcrumb">
+            <ol class="eds-breadcrumbs" style="margin:0;padding:0;">
+              <li><a href="#pagination">Home</a></li>
+              <li><a href="#pagination">Gift cards</a></li>
+              <li><span aria-current="page">Game Gift Card $50</span></li>
+            </ol>
+          </nav>
+          <nav class="eds-pagination eds-mt-6" aria-label="Pagination">
+            <a class="eds-pagination__link" href="#pagination" aria-label="Previous page">‹</a>
+            <a class="eds-pagination__link" href="#pagination">1</a>
+            <a class="eds-pagination__link" href="#pagination" aria-current="page">2</a>
+            <a class="eds-pagination__link" href="#pagination">3</a>
+            <span class="eds-pagination__link" aria-hidden="true" style="pointer-events:none;">…</span>
+            <a class="eds-pagination__link" href="#pagination">12</a>
+            <a class="eds-pagination__link" href="#pagination" aria-label="Next page">›</a>
+          </nav>
+        </div>
+        <div class="sg-demo-code"><pre></pre></div>
+      </div>
+    </section>
+
+    <!-- ============ AVATAR & STAT ============ -->
+    <section id="avatar-stat" data-search="avatar profile initials user image stat number metric counter">
+      <h2 class="sg-section-title">Avatar &amp; Stat</h2>
+      <div class="sg-demo" data-demo>
+        <div class="sg-demo-head">
+          <p class="sg-demo-title">Avatars + stat display</p>
+          <div class="sg-demo-actions">
+            <button type="button" class="sg-chipbtn" data-toggle-code>Code</button>
+            <button type="button" class="sg-chipbtn" data-copy-code>Copy</button>
+          </div>
+        </div>
+        <div class="sg-demo-canvas" data-width="desktop">
+          <div class="eds-row-6">
+            <span class="eds-avatar" aria-label="Jane Doe">JD</span>
+            <span class="eds-avatar eds-avatar--lg" aria-label="Alex Smith">AS</span>
+            <div class="eds-stat">
+              <span class="eds-stat__value">12,480</span>
+              <span class="eds-stat__label">Orders delivered</span>
+            </div>
+            <div class="eds-stat">
+              <span class="eds-stat__value">99.2%</span>
+              <span class="eds-stat__label">Delivery success</span>
+            </div>
+          </div>
+        </div>
+        <div class="sg-demo-code"><pre></pre></div>
+      </div>
+    </section>
+
+    <!-- ============ QUANTITY ============ -->
+    <section id="qty" data-search="quantity stepper number input increment decrement cart">
+      <h2 class="sg-section-title">Quantity Stepper</h2>
+      <p class="sg-section-desc">Min/max-aware stepper via <span class="sg-code">data-eds-qty</span>; buttons auto-disable at the limits and a <span class="sg-code">change</span> event fires on every step.</p>
+      <div class="sg-demo" data-demo>
+        <div class="sg-demo-head">
+          <p class="sg-demo-title">Quantity stepper</p>
+          <div class="sg-demo-actions">
+            <button type="button" class="sg-chipbtn" data-toggle-code>Code</button>
+            <button type="button" class="sg-chipbtn" data-copy-code>Copy</button>
+          </div>
+        </div>
+        <div class="sg-demo-canvas" data-width="desktop">
+          <div class="eds-qty" data-eds-qty>
+            <button type="button" data-eds-qty-dec aria-label="Decrease quantity">−</button>
+            <input type="number" value="1" min="1" max="9" aria-label="Quantity" />
+            <button type="button" data-eds-qty-inc aria-label="Increase quantity">+</button>
+          </div>
+        </div>
+        <div class="sg-demo-code"><pre></pre></div>
+      </div>
+    </section>
+
+    <!-- ============ SKELETONS ============ -->
+    <section id="skeleton" data-search="skeleton loading shimmer placeholder state">
+      <h2 class="sg-section-title">Skeletons</h2>
+      <p class="sg-section-desc">GPU-friendly shimmer (background-position only). Skeletons reserve the final content space so nothing shifts when data arrives.</p>
+      <div class="sg-demo" data-demo>
+        <div class="sg-demo-head">
+          <p class="sg-demo-title">Loading placeholders</p>
+          <div class="sg-demo-actions">
+            <button type="button" class="sg-chipbtn" data-toggle-code>Code</button>
+            <button type="button" class="sg-chipbtn" data-copy-code>Copy</button>
+          </div>
+        </div>
+        <div class="sg-demo-canvas" data-width="desktop">
+          <div class="eds-grid-3">
+            <div class="eds-card eds-card--flush">
+              <div class="eds-skeleton eds-skeleton--media" style="border-radius:0;"></div>
+              <div class="eds-stack-2 eds-p-4">
+                <div class="eds-skeleton eds-skeleton--title"></div>
+                <div class="eds-skeleton eds-skeleton--text"></div>
+                <div class="eds-skeleton eds-skeleton--text" style="width:40%;"></div>
+              </div>
+            </div>
+            <div class="eds-row-3">
+              <div class="eds-skeleton eds-skeleton--circle" style="width:48px;height:48px;"></div>
+              <div class="eds-stack-2" style="flex:1;">
+                <div class="eds-skeleton eds-skeleton--text" style="width:60%;"></div>
+                <div class="eds-skeleton eds-skeleton--text" style="width:90%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sg-demo-code"><pre></pre></div>
+      </div>
+    </section>
+
+    <!-- ============ COPY & SUBMIT GUARD ============ -->
+    <section id="copy-submit" data-search="copy clipboard submit guard loading form double submission">
+      <h2 class="sg-section-title">Copy &amp; Submit Guard</h2>
+      <p class="sg-section-desc"><span class="sg-code">data-eds-copy</span> copies text with built-in "Copied" feedback. <span class="sg-code">data-eds-submit</span> on a form disables the submit button with a spinner and blocks double submission.</p>
+      <div class="sg-demo" data-demo>
+        <div class="sg-demo-head">
+          <p class="sg-demo-title">Copy button + guarded form</p>
+          <div class="sg-demo-actions">
+            <button type="button" class="sg-chipbtn" data-toggle-code>Code</button>
+            <button type="button" class="sg-chipbtn" data-copy-code>Copy</button>
+          </div>
+        </div>
+        <div class="sg-demo-canvas" data-width="desktop">
+          <div class="eds-row-3">
+            <code class="sg-code" id="sg-coupon" style="font-size: var(--eds-text-0); padding: var(--eds-space-2) var(--eds-space-3);">SAVE20-XK4P</code>
+            <button class="eds-btn eds-btn--secondary eds-btn--sm" type="button" data-eds-copy data-eds-copy-target="#sg-coupon">Copy code</button>
+          </div>
+          <form data-eds-submit class="eds-row-3 eds-mt-6" style="align-items: flex-end; max-width: 480px;">
+            <div class="eds-field" style="flex:1;">
+              <label class="eds-field__label" for="sg-nl-email">Email for updates</label>
+              <input class="eds-input" id="sg-nl-email" type="email" autocomplete="email" placeholder="you@example.com" required />
+            </div>
+            <button class="eds-btn eds-btn--primary" type="submit">Subscribe</button>
+          </form>
+        </div>
+        <div class="sg-demo-code"><pre></pre></div>
+      </div>
+    </section>
+
+    <!-- ============ STICKY CTA ============ -->
+    <section id="sticky-cta" data-search="sticky cta bar bottom call to action mobile conversion safe-area">
+      <h2 class="sg-section-title">Sticky CTA</h2>
+      <p class="sg-section-desc">A bottom bar for mobile conversion flows: safe-area aware, hidden on desktop (≥840px). Shown here inline (position static, display forced) so it doesn&apos;t cover this page.</p>
+      <div class="sg-demo" data-demo>
+        <div class="sg-demo-head">
+          <p class="sg-demo-title">Sticky mobile CTA bar</p>
+          <div class="sg-demo-actions">
+            <button type="button" class="sg-chipbtn" data-toggle-code>Code</button>
+            <button type="button" class="sg-chipbtn" data-copy-code>Copy</button>
+          </div>
+        </div>
+        <div class="sg-demo-canvas" data-width="desktop" style="padding: 0;">
+          <div class="eds-sticky-cta" style="position: static; display: flex;">
+            <div>
+              <p class="eds-text-xs eds-text-muted" style="margin:0;">Total</p>
+              <p class="eds-price" style="margin:0; font-size: var(--eds-text-1);">$40.00</p>
+            </div>
+            <button class="eds-btn eds-btn--primary" type="button">Buy now</button>
+          </div>
+        </div>
+        <div class="sg-demo-code"><pre></pre></div>
+      </div>
+    </section>
+
+    <!-- ============ UTILITIES ============ -->
+    <section id="utilities" data-search="utilities layout stack row grid container section visually hidden divider spacing text">
+      <h2 class="sg-section-title">Layout Utilities</h2>
+      <p class="sg-section-desc">A small, prefixed utility set — enough to compose sections without writing layout CSS, small enough to memorize.</p>
+      <div class="eds-grid-2">
+        <div class="eds-card">
+          <h3 class="sg-h3" style="margin-top:0;">Structure</h3>
+          <ul class="eds-stack-2 eds-text-muted" style="margin:0; padding-left: var(--eds-space-5); font-size: var(--eds-text-0);">
+            <li><span class="sg-code">eds-container</span> / <span class="sg-code">--narrow</span> — centered max-width wrapper</li>
+            <li><span class="sg-code">eds-section</span> / <span class="sg-code">--sunken</span> — vertical page rhythm</li>
+            <li><span class="sg-code">eds-stack-1…8</span> — vertical flex + gap</li>
+            <li><span class="sg-code">eds-row-1…6</span> — horizontal flex + gap (wraps); <span class="sg-code">--between --center --end --nowrap</span></li>
+            <li><span class="sg-code">eds-grid-2/3/4</span> — responsive grids (1 col mobile → N cols desktop)</li>
+            <li><span class="sg-code">eds-divider</span> — hairline rule</li>
+          </ul>
+        </div>
+        <div class="eds-card">
+          <h3 class="sg-h3" style="margin-top:0;">Text, spacing &amp; visibility</h3>
+          <ul class="eds-stack-2 eds-text-muted" style="margin:0; padding-left: var(--eds-space-5); font-size: var(--eds-text-0);">
+            <li><span class="sg-code">eds-text-muted / -faint / -sm / -xs / -center</span></li>
+            <li><span class="sg-code">eds-weight-medium / -semibold</span>, <span class="sg-code">eds-tabular</span> — tabular numbers for prices</li>
+            <li><span class="sg-code">eds-mt-2/4/6/8/12</span>, <span class="sg-code">eds-p-4/6</span></li>
+            <li><span class="sg-code">eds-hide-mobile / eds-hide-desktop</span> — breakpoint 840px</li>
+            <li><span class="sg-code">eds-visually-hidden</span> — screen-reader-only text</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <footer style="padding-top: var(--eds-space-8); border-top: 1px solid var(--eds-border); color: var(--eds-text-faint); font-size: var(--eds-text-0);">
+      <p style="margin:0;">EDS v2 — rendered live from <span class="sg-code">dist/eds.css</span> + <span class="sg-code">dist/eds.js</span>. Usage rules in <span class="sg-code">SKILL.md</span>.</p>
+    </footer>
+  </main>
+</div>
+
+<div class="sg-copied-toast" id="sg-copied" role="status" aria-live="polite">Copied to clipboard</div>
+
+<script src="dist/eds.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- Token data (mirrors dist/eds-tokens.css) ---------- */
+  var semanticTokens = [
+    '--eds-primary', '--eds-primary-hover', '--eds-primary-active', '--eds-primary-fg',
+    '--eds-primary-soft', '--eds-primary-soft-fg',
+    '--eds-bg', '--eds-surface', '--eds-surface-sunken', '--eds-surface-raised',
+    '--eds-text', '--eds-text-muted', '--eds-text-faint',
+    '--eds-border', '--eds-border-strong', '--eds-ring',
+    '--eds-success', '--eds-success-soft', '--eds-warning', '--eds-warning-soft',
+    '--eds-danger', '--eds-danger-soft'
+  ];
+  var primitiveTokens = [
+    '--eds-blue-50', '--eds-blue-100', '--eds-blue-300', '--eds-blue-500', '--eds-blue-600', '--eds-blue-700', '--eds-blue-900',
+    '--eds-gray-50', '--eds-gray-100', '--eds-gray-200', '--eds-gray-300', '--eds-gray-400',
+    '--eds-gray-500', '--eds-gray-600', '--eds-gray-700', '--eds-gray-900',
+    '--eds-green-600', '--eds-green-50', '--eds-amber-600', '--eds-amber-50',
+    '--eds-red-600', '--eds-red-50', '--eds-white'
+  ];
+
+  var rootStyle = getComputedStyle(document.documentElement);
+
+  function makeSwatch(varName) {
+    var value = rootStyle.getPropertyValue(varName).trim();
+    var btn = document.createElement('button');
+    btn.className = 'sg-swatch';
+    btn.type = 'button';
+    btn.setAttribute('aria-label', 'Copy ' + varName);
+    btn.innerHTML =
+      '<span class="sg-swatch-color" style="background: var(' + varName + ');"></span>' +
+      '<span class="sg-swatch-meta"><span class="sg-swatch-name">' + varName + '</span>' +
+      '<span class="sg-swatch-value">' + value + '</span></span>';
+    btn.addEventListener('click', function () { copyText('var(' + varName + ')'); });
+    return btn;
+  }
+
+  var semWrap = document.getElementById('sg-semantic-swatches');
+  var primWrap = document.getElementById('sg-primitive-swatches');
+  semanticTokens.forEach(function (t) { semWrap.appendChild(makeSwatch(t)); });
+  primitiveTokens.forEach(function (t) { primWrap.appendChild(makeSwatch(t)); });
+
+  /* ---------- Type scale ---------- */
+  var typeTokens = ['--eds-text--1', '--eds-text-0', '--eds-text-1', '--eds-text-2', '--eds-text-3', '--eds-text-4', '--eds-text-5', '--eds-text-6'];
+  var typeWrap = document.getElementById('sg-type-scale');
+  typeTokens.forEach(function (t, i) {
+    var row = document.createElement('div');
+    row.className = 'sg-type-row';
+    row.innerHTML =
+      '<span class="sg-scale-label">' + t + '</span>' +
+      '<span style="font-size: var(' + t + '); font-weight: ' + (i >= 4 ? '700' : '400') + '; line-height: 1.2;">The quick brown fox</span>';
+    typeWrap.appendChild(row);
+  });
+
+  /* ---------- Spacing scale ---------- */
+  var spaceTokens = ['--eds-space-1', '--eds-space-2', '--eds-space-3', '--eds-space-4', '--eds-space-5', '--eds-space-6', '--eds-space-8', '--eds-space-10', '--eds-space-12', '--eds-space-16', '--eds-space-20', '--eds-space-24'];
+  var spaceWrap = document.getElementById('sg-space-scale');
+  spaceTokens.forEach(function (t) {
+    var value = rootStyle.getPropertyValue(t).trim();
+    var row = document.createElement('div');
+    row.className = 'sg-space-row';
+    row.innerHTML =
+      '<span class="sg-scale-label">' + t + ' · ' + value + '</span>' +
+      '<span class="sg-space-bar" style="width: var(' + t + ');"></span>';
+    spaceWrap.appendChild(row);
+  });
+
+  /* ---------- Radius & shadows ---------- */
+  ['--eds-radius-sm', '--eds-radius-md', '--eds-radius-lg', '--eds-radius-xl', '--eds-radius-full'].forEach(function (t) {
+    var tile = document.createElement('div');
+    tile.className = 'sg-tile';
+    tile.innerHTML = '<div style="height: 44px; background: var(--eds-primary-soft); border: 1px solid var(--eds-primary); border-radius: var(' + t + '); margin-bottom: 8px;"></div>' + t;
+    document.getElementById('sg-radius-tiles').appendChild(tile);
+  });
+  ['--eds-shadow-sm', '--eds-shadow-md', '--eds-shadow-lg', '--eds-shadow-xl'].forEach(function (t) {
+    var tile = document.createElement('div');
+    tile.className = 'sg-tile';
+    tile.innerHTML = '<div style="height: 44px; background: var(--eds-bg); border-radius: var(--eds-radius-md); box-shadow: var(' + t + '); margin-bottom: 8px;"></div>' + t;
+    document.getElementById('sg-shadow-tiles').appendChild(tile);
+  });
+
+  /* ---------- Demo controls: viewport, code toggle, copy ---------- */
+  function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function dedent(html) {
+    var lines = html.replace(/^\n+|\s+$/g, '').split('\n');
+    var indents = lines.filter(function (l) { return l.trim(); }).map(function (l) { return l.match(/^\s*/)[0].length; });
+    var min = Math.min.apply(null, indents);
+    return lines.map(function (l) { return l.slice(min); }).join('\n');
+  }
+
+  document.querySelectorAll('[data-demo]').forEach(function (demo) {
+    var canvas = demo.querySelector('.sg-demo-canvas');
+    var codeBlock = demo.querySelector('.sg-demo-code');
+    var pre = codeBlock.querySelector('pre');
+    var source = dedent(canvas.innerHTML);
+
+    demo.querySelectorAll('[data-vw]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        canvas.setAttribute('data-width', btn.getAttribute('data-vw'));
+        demo.querySelectorAll('[data-vw]').forEach(function (b) {
+          b.setAttribute('aria-pressed', String(b === btn));
+        });
+      });
+    });
+
+    var toggleBtn = demo.querySelector('[data-toggle-code]');
+    toggleBtn.addEventListener('click', function () {
+      var isOpen = codeBlock.classList.toggle('is-open');
+      if (isOpen && !pre.textContent) pre.innerHTML = escapeHtml(source);
+      toggleBtn.textContent = isOpen ? 'Hide code' : 'Code';
+    });
+
+    demo.querySelector('[data-copy-code]').addEventListener('click', function () {
+      copyText(source);
+    });
+  });
+
+  /* ---------- Copy helper + feedback ---------- */
+  var copiedToast = document.getElementById('sg-copied');
+  var toastTimer;
+  function copyText(text) {
+    function done() {
+      copiedToast.classList.add('is-visible');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { copiedToast.classList.remove('is-visible'); }, 1600);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, done);
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) { /* noop */ }
+      ta.remove();
+      done();
+    }
+  }
+
+  /* ---------- Style guide search ---------- */
+  var searchInput = document.getElementById('sg-search');
+  var sections = Array.prototype.slice.call(document.querySelectorAll('.sg-main > section[data-search]'));
+  searchInput.addEventListener('input', function () {
+    var q = searchInput.value.trim().toLowerCase();
+    sections.forEach(function (sec) {
+      var haystack = (sec.getAttribute('data-search') + ' ' + sec.id).toLowerCase();
+      sec.classList.toggle('sg-hidden', q !== '' && haystack.indexOf(q) === -1);
+    });
+  });
+
+  /* ---------- Live theming ---------- */
+  var themeInputs = Array.prototype.slice.call(document.querySelectorAll('#theming input[type="color"]'));
+  var radiusInput = document.getElementById('th-radius');
+  var radiusOut = document.getElementById('th-radius-out');
+  var defaults = {};
+  themeInputs.forEach(function (input) { defaults[input.dataset.var] = input.value; });
+
+  var RADIUS_BASE = { '--eds-radius-sm': 6, '--eds-radius-md': 10, '--eds-radius-lg': 14, '--eds-radius-xl': 20 };
+
+  /* Tokens are declared on `:root, .eds` — body carries .eds, so overrides
+     must be applied to the .eds element itself to win the cascade. */
+  var themeScope = document.body;
+
+  function applyTheme() {
+    var root = themeScope;
+    themeInputs.forEach(function (i) { root.style.setProperty(i.dataset.var, i.value); });
+    var s = parseFloat(radiusInput.value);
+    radiusOut.textContent = s + '\u00d7';
+    Object.keys(RADIUS_BASE).forEach(function (v) {
+      root.style.setProperty(v, RADIUS_BASE[v] * s + 'px');
+    });
+  }
+
+  themeInputs.forEach(function (i) { i.addEventListener('input', applyTheme); });
+  radiusInput.addEventListener('input', applyTheme);
+
+  document.getElementById('th-reset').addEventListener('click', function () {
+    var root = themeScope;
+    themeInputs.forEach(function (i) {
+      i.value = defaults[i.dataset.var];
+      root.style.removeProperty(i.dataset.var);
+    });
+    radiusInput.value = '1';
+    radiusOut.textContent = '1\u00d7';
+    Object.keys(RADIUS_BASE).forEach(function (v) { root.style.removeProperty(v); });
+  });
+
+  document.getElementById('th-copy').addEventListener('click', function () {
+    var lines = [':root,', '.eds {'];
+    themeInputs.forEach(function (i) {
+      if (i.value !== defaults[i.dataset.var]) lines.push('  ' + i.dataset.var + ': ' + i.value + ';');
+    });
+    var s = parseFloat(radiusInput.value);
+    if (s !== 1) {
+      Object.keys(RADIUS_BASE).forEach(function (v) {
+        lines.push('  ' + v + ': ' + RADIUS_BASE[v] * s + 'px;');
+      });
+    }
+    lines.push('}');
+    copyText(lines.join('\n'));
+  });
+
+  /* ---------- Demo form: restore after fake submit ---------- */
+  var demoForm = document.querySelector('form[data-eds-submit]');
+  if (demoForm) {
+    demoForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      setTimeout(function () {
+        demoForm.dispatchEvent(new CustomEvent('eds:reset'));
+        if (window.EDS) window.EDS.toast('Subscribed — check your inbox', 'success');
+      }, 1200);
+    });
+  }
+})();
+</script>
+</body>
+</html>

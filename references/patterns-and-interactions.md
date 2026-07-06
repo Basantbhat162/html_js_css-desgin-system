@@ -1,93 +1,82 @@
 # Patterns and Interactions
 
+How to compose the shipped components (`dist/eds.css` + `dist/eds.js`) into pages, and the interaction rules the library follows. Component-level contracts live in `references/component-catalog.md`.
+
 ## Mobile-First Layout
 
-- Start at `320px`.
-- Default to single-column flow.
-- Use 2-column grids only when each item still has readable text and a clear CTA.
-- Use horizontal chip scroll for categories; it is better than cramped multi-row filters.
-- Constrain desktop content to `1040-1180px`; do not stretch text or cards endlessly.
-- Use page bands, whitespace, and type hierarchy before adding panels.
+- Start at `320px`. Every composition must work there without shrinking text or hiding the main action.
+- Default to single-column flow (`.eds-stack-*`); use `.eds-grid-2` only when each item keeps readable text and a clear CTA.
+- Use `.eds-chip-scroll` for categories — horizontal chip scroll beats cramped multi-row filters.
+- Desktop content is constrained by `.eds-container` (1140px) / `--narrow` (760px); do not stretch text or cards endlessly.
+- Use page bands (`.eds-section`, `--sunken`), whitespace, and type hierarchy before adding panels or borders.
 
 ## Commerce Discovery Pattern
 
-Use for game top-ups, gift cards, subscriptions, vouchers, and digital products:
+Use for game top-ups, gift cards, subscriptions, vouchers, and digital products — composed entirely from shipped components:
 
-1. Header: title, short utility copy, optional trust cue.
-2. Search: full-width on mobile.
-3. Category controls: scrollable pills or tiles.
-4. Product grid/list: cards with stable image area.
-5. Offer details: discount/status badge only if meaningful.
-6. CTA: compact buy/top-up action.
+1. Header: `.eds-section-header` — title, short utility copy, optional `.eds-trust-chip`.
+2. Search: `.eds-search` with `data-eds-search`, full-width on mobile.
+3. Category controls: `.eds-chip-scroll` with `data-eds-filter`, or `.eds-tile` grid.
+4. Product grid/list: `.eds-product-card` in `.eds-grid-2`, or `.eds-product-row` for density.
+5. Offer details: `.eds-badge` only when the discount/status is meaningful.
+6. CTA: one `.eds-btn--primary` per card; `.eds-sticky-cta` on detail pages.
 
-Delete anything that does not help this flow. Product discovery pages become AI-looking when every metric, badge, and secondary action is visible at once.
+Delete anything that does not help this flow. Discovery pages become AI-looking when every metric, badge, and secondary action is visible at once.
 
 ## Interaction Timing
+
+The library's motion tokens (`--eds-duration-*`, `--eds-ease`) encode these rules:
 
 - Press feedback: `80-150ms`.
 - Hover/focus transition: `150-220ms`.
 - Panel open/close: `220-320ms`.
-- Avoid UI animations over `500ms`.
-- Animate `opacity` and `transform`; avoid animating width, height, top, left, or layout-heavy properties.
-- Keep all required content and states visible without animation; motion should enhance, not control the interface.
-- Do not use a global reduced-motion rule that forces every transition to `.01ms`, because OS visual-effect settings can make the interface feel broken.
-- Avoid hover transforms on containers that can overlap neighboring content. Apply lift only to buttons, chips, cards with reserved spacing, or isolated objects.
-- Use `will-change: transform` sparingly and only on elements that actually animate.
+- Nothing over `500ms`.
+- Animate `opacity` and `transform` only; never width, height, top, left, or layout-heavy properties.
+- All required content and states stay visible without animation; motion enhances, never controls.
+- Avoid hover transforms on containers that can overlap neighbors. Lift only buttons, chips, and cards with reserved spacing (`.eds-card--interactive` reserves it).
+- `will-change: transform` sparingly, only on elements that actually animate.
 
-```css
-@media (prefers-reduced-motion: reduce) {
-  .eds-section *,
-  .eds-section *::before,
-  .eds-section *::after {
-    animation: none !important;
-    scroll-behavior: auto !important;
-  }
-}
-```
-
-Only include the reduced-motion block when there is decorative entrance motion to remove. Do not remove hover, focus, press, or loading-state feedback unless the static state remains equally clear.
+Reduced motion: `dist/eds.css` ships a scoped `prefers-reduced-motion` rule that removes decorative entrance motion only. Do not add a global rule forcing every transition to `.01ms` — it kills hover/focus/press feedback and feels broken with OS visual-effect settings.
 
 ## Vanilla JS Patterns
 
-- Keep JS as progressive enhancement; the HTML should remain readable without it.
-- For tabs, toggle `aria-selected` on tabs and one active class or `hidden` on panels.
-- For filters and amount selectors, toggle `aria-pressed`; do not rewrite markup.
-- For toasts, add an exit class, wait for the transition duration, then set `hidden`.
-- For loading buttons, set `disabled`, update the label, and restore state after the async action.
-- Do not measure heights or animate layout in JS unless there is no simpler CSS/HTML pattern.
+`dist/eds.js` implements these; follow them for any custom behavior too:
+
+- JS is progressive enhancement; HTML stays readable without it (accordion and modal are native elements first).
+- Tabs toggle `aria-selected` and panel `hidden` — nothing else.
+- Filters and steppers toggle `aria-pressed` / input value; markup is never rewritten.
+- Toasts add an exit class, wait for the transition, then hide.
+- Loading buttons set `disabled`, swap the label (`data-eds-loading`), and restore state after the action.
+- No height measuring or layout animation in JS unless there is no simpler CSS/HTML pattern.
+- After injecting dynamic markup, call `EDS.init(container)` to bind behaviors on the new nodes.
 
 ## Accessibility Defaults
 
-- Use `h2` for section titles unless the section is the page hero.
-- Keep heading order sequential.
-- Use `aria-label` for icon-only buttons.
-- Use `aria-live="polite"` for result counts, toasts, and async feedback.
-- Use `role="alert"` for validation errors.
-- Make focus visible with `box-shadow: var(--eds-focus)`.
-- Do not remove browser focus outlines without a replacement.
+- `h2` for section titles unless the section is the page hero; keep heading order sequential.
+- `aria-label` for icon-only buttons.
+- `aria-live="polite"` for result counts, toasts, and async feedback (search and toast region do this automatically).
+- `role="alert"` for validation errors.
+- Focus is visible via the shared focus ring token (`--eds-focus`); never remove outlines without a replacement.
 
 ## Content Rules
 
-- UI copy should be short and specific.
-- Button text should state the result: `Buy now`, `View offers`, `Apply filter`, `Reset search`.
-- Empty states should tell users what to do next.
-- Error states should include recovery: retry, edit input, reset filters, contact support.
-- Avoid lorem ipsum and fake filler. Use realistic neutral example content only when a preview needs sample data.
+- UI copy short and specific.
+- Button text states the result: `Buy now`, `Check ID`, `View offers`, `Reset filters`.
+- Empty states tell users what to do next (`data-eds-search-empty` pattern includes a reset action).
+- Error states include recovery: retry, edit input, reset filters, contact support.
+- No lorem ipsum or fake filler; realistic neutral example content only when a preview needs sample data.
 
 ## Anti-Patterns
 
 - Dark mode variants.
-- Purple/blue gradient hero defaults.
-- Decorative orbs, blob backgrounds, bokeh, or overused glass panels.
-- Over-carded layouts where every group floats in a bordered box.
-- Over-bordered layouts where every heading, row, sidebar, and card has a divider.
-- Top-level action clutter: view, copy, share, save, compare, delete, and buy all shown together.
-- Inset segmented controls used as whole-page navigation.
-- Subheadings that say what the heading already says.
+- Purple/blue gradient hero defaults, decorative orbs, blobs, bokeh, glass panels.
+- Over-carded layouts (every group in a bordered box) and over-bordered layouts (dividers everywhere).
+- Nested cards; whole sections in floating cards.
+- Top-level action clutter: view, copy, share, save, compare, delete, and buy all visible together — overflow into `data-eds-menu`.
+- Inset segmented controls as whole-page navigation.
+- Subheadings that restate the heading.
 - Emoji icons for navigation, trust, category, or status.
 - Placeholder-only form labels.
 - Hover-only interactions on mobile.
-- Generic AI sections with three cards, vague copy, and no real workflow.
-- Nested cards inside cards.
-- Whole sections placed in floating cards.
 - Arbitrary raw colors inside components instead of tokens.
+- Generic AI sections: three cards, vague copy, no real workflow.

@@ -1,77 +1,88 @@
 ---
 name: elementor-design-system
-description: Reusable white-theme design system and component library for WordPress + Elementor custom HTML widgets. Use when building, improving, reviewing, or extending HTML/CSS/JavaScript sections for Elementor; creating reusable UI components, design tokens, layout standards, commerce/product grids, cards, navigation, forms, search, tabs, accordions, micro-interactions, responsive behavior, accessibility checks, or adding new patterns back into the library. Optimized for mobile-first websites using blue, white, and black brand styling with system fonts only.
+description: EDS v2 — a zero-dependency, drop-in design system shipped as ready-to-paste CSS/JS (dist/eds.css, dist/eds.js) for WordPress + Elementor HTML widgets and any plain HTML site. Use when building, styling, reviewing, or extending UI sections; composing components (buttons, cards, tabs, accordions, modals, toasts, forms, tables, navbars, heroes, footers, sticky CTAs); theming/rebranding via semantic tokens; or adding new patterns back into the library. Mobile-first, light theme, blue accent by default, fully themeable, system fonts only.
 ---
 
-# Elementor Design System
+# EDS — Elementor Design System (v2)
 
-Use this skill to create premium, mobile-first Elementor sections with custom HTML, CSS, and JavaScript. Treat it as a living UI library: every useful new token, component, pattern, or implementation improvement should be folded back into the skill so future sections become more consistent.
+A complete, production-ready UI system shipped as plain files — no build step, no npm, no external requests. Treat it as a living library: improvements go back into the `dist/` files, the style guide, and these docs.
 
-## Operating Rules
+## Shipped files
 
-- Build only with HTML, CSS, and vanilla JavaScript suitable for Elementor HTML widgets and Advanced -> Custom CSS.
-- Use a white theme only. Do not add dark mode, cream/tan themes, purple-gradient defaults, decorative blobs, or soft rounded AI-card layouts.
-- Use blue as the accent, white as the main surface, and black/near-black as the primary text.
-- Use system fonts only: no Google Fonts, CDN fonts, icon fonts, or externally hosted assets unless the user explicitly provides them.
-- Prefer a readable UI stack led by `"Segoe UI"` on Windows; avoid heavy `850/900` weights and excessive monospace labels.
-- Treat modern component libraries as quality references only. Translate their patterns into plain HTML/CSS/JS; do not import Tailwind, Preline, React, CDNs, or framework classes.
-- Build component APIs with a base class plus modifier classes, e.g. `.eds-btn` plus `.eds-btn--primary`, so state behavior stays consistent across projects.
-- Make mobile the source layout. Enhance at `600px`, `840px`, and `1200px`.
-- Prefer semantic HTML, real buttons/links/labels, visible focus states, and 44px minimum touch targets.
-- Keep JavaScript optional and small. Use CSS for layout, states, and simple transitions.
-- Never clone reference sites. Extract principles only: category browsing, compact commerce cards, trust signals, search, badges, and fast purchase flows.
-- De-slop every UI before delivery: remove unnecessary cards, extra borders, redundant subheadings, top-level action clutter, fake stats, placeholder content, and default component-library patterns.
+| File | Purpose | Load order |
+|---|---|---|
+| `dist/eds.css` | The full library: tokens + reset + components + utilities (self-contained) | `<head>` |
+| `dist/eds-tokens.css` | Tokens only — for projects that want variables without components | optional |
+| `dist/eds.js` | Behaviors via `window.EDS`: tabs, modal, dropdown, toast, accordion, navbar, sticky CTA, scroll reveal | end of `<body>` or `defer` |
+| `styleguide.html` | Living reference: every token and component rendered live from the files above, with copy-to-clipboard code, responsive preview toggles, live theming, and search | open in a browser |
+
+## Quick start
+
+```html
+<link rel="stylesheet" href="dist/eds.css" />
+...
+<script src="dist/eds.js" defer></script>
+```
+
+Elementor: enqueue both files in the child theme (preferred) or paste the CSS into Site Settings → Custom CSS and load the JS from an HTML widget. Component markup goes into HTML widgets. Details: `references/elementor-implementation.md`.
+
+## Operating rules (non-negotiable)
+
+1. **Semantic tokens only.** Style with `--eds-primary`, `--eds-text`, `--eds-surface`, etc. Never hardcode hex values in component CSS and never reference primitives (`--eds-blue-600`) outside the token file. Rebranding must require only overriding semantic variables.
+2. **Zero external requests.** System font stack, inline SVG only. No CDNs, no icon fonts, no web fonts unless the user provides them.
+3. **No build step.** Everything ships runnable. Improvements are edits to the `dist/` files directly.
+4. **Native elements first.** `<dialog>` for modals, `<details>`/`<summary>` for accordions, real `<button>`/`<a>`, labeled form controls. JS enhances; content never depends on it.
+5. **Animate transform/opacity only.** Never animate layout properties. The library respects `prefers-reduced-motion` — do not undo it.
+6. **Mobile-first.** Every component must work at 320px with no horizontal scroll. Breakpoints: 640px (`sm`), 768px (`md`), 1024px (`lg`). Touch targets ≥ 44px.
+7. **Light theme only.** White canvas, blue accent by default, themeable via semantic tokens. No dark mode.
+8. **`eds-` prefix everywhere.** All classes, data attributes (`data-eds-*`), and variables (`--eds-*`) are prefixed to avoid theme/plugin collisions.
+9. **De-slop before delivery.** Apply `references/anti-slop-rules.md`: no gradient blobs, no emoji icons, no fake stats or reviews, no placeholder copy, no card-around-everything layouts.
+
+## Theming a project
+
+Override semantic tokens after loading `eds.css` — that is the entire rebrand. Always target `:root, .eds` (not `:root` alone) so the override also wins on the element carrying the `.eds` scope class:
+
+```css
+:root,
+.eds {
+  --eds-primary: #0d9488;
+  --eds-primary-hover: #0f766e;
+  --eds-primary-soft: #ccfbf1;
+  --eds-focus-ring: #0d9488;
+  --eds-font-sans: "Brand Font", ui-sans-serif, system-ui, sans-serif;
+}
+```
+
+The Theming section of `styleguide.html` generates this block interactively.
 
 ## Workflow
 
-1. Identify the section job: product discovery, conversion, trust, navigation, form, content, or support.
-2. Read `references/design-tokens.md` before writing CSS.
-3. Read `references/component-catalog.md` when creating or modifying a component.
-4. Read `references/elementor-implementation.md` before packaging code for Elementor.
-5. Read `references/anti-slop-rules.md` before finalizing visual direction.
-6. Read `references/patterns-and-interactions.md` for search, tabs, accordions, motion, loading, empty, and error states.
-7. Read `references/library-growth.md` when adding a new reusable pattern to the skill.
-8. Build with scoped class names prefixed by `eds-` to avoid Elementor/theme collisions.
-9. Verify mobile widths first: `320`, `375`, `414`, then `768`, `1024`, `1440`.
+1. Identify the section job: discovery, conversion, trust, navigation, form, content, or support.
+2. Open `styleguide.html` to see what already exists; compose from the catalog before writing new CSS.
+3. Read `references/design-tokens.md` before touching variables.
+4. Read `references/component-catalog.md` for each component's markup contract, variants, and JS hooks.
+5. Read `references/patterns-and-interactions.md` for the `EDS` JS API and motion/interaction rules.
+6. Read `references/elementor-implementation.md` before packaging for WordPress/Elementor.
+7. Read `references/anti-slop-rules.md` before finalizing visual direction.
+8. Adding something new? Follow `references/library-growth.md`: tokens → markup contract → CSS in `dist/eds.css` → behavior in `dist/eds.js` → demo in `styleguide.html` → docs in the catalog.
+9. Verify at widths `320`, `375`, `768`, `1024`, `1440` before delivery.
 
-## Design Direction
+## Quality gate
 
-Default to a clean commerce/SaaS hybrid:
-
-- White canvas, deliberate spacing, sharp type hierarchy, very few borders, and almost no shadows.
-- Dense but readable mobile layouts, especially cards, categories, filters, and buy actions.
-- Product-first hierarchy: image/title/value/action before long copy.
-- Compact trust cues: instant delivery, secure checkout, verified/authentic, support.
-- One strong accent treatment per section: blue CTA, active underline, progress line, or focused input.
-- Hover and focus colors must follow the component contract: primary buttons stay white text on darker blue, secondary buttons may become blue-tinted, and destructive/success states use semantic colors only for state.
-- Do not use decorative vertical color rails beside text blocks; they read as AI artifacts in this system.
-- Original visual language over templates: use structure and rhythm from references, not their exact colors, copy, or composition.
-
-## Quality Gate
-
-Before delivery, check:
-
-- No horizontal scroll at `320px`.
-- Every section has one primary job and one obvious next action.
-- Cards are used only for repeated product/content items, not for every block.
-- Borders are used only where spacing/type cannot separate content clearly.
-- Subheadings are deleted when they merely explain the heading.
-- Top-level actions are limited to the actions users need immediately.
-- Body text is at least `16px`; labels may be `12-14px`.
-- All taps are at least `44x44px` with `8px` separation.
-- Text contrast meets WCAG AA; black/near-black text on white is preferred.
-- Animations use transform/opacity only, never carry layout state, and must remain visually stable even when OS visual effects or reduced-motion preferences are changed.
-- Images reserve space with `aspect-ratio`, `width`, `height`, or stable containers.
-- Forms have labels, helper/error text, correct input types, and accessible error announcements.
-- Product cards show title, category/metadata, price/value if relevant, action, and a trust/discount/status cue only when useful.
-- No placeholders, fake numbers, fake reviews, or invented trust claims remain.
+- No horizontal scroll at 320px; all taps ≥ 44×44px with 8px separation.
+- One primary job and one obvious next action per section.
+- Body text ≥ 16px; WCAG AA contrast; visible focus rings on every interactive element.
+- Cards only for repeated items; borders only where spacing/type cannot separate content.
+- Images reserve space (`aspect-ratio` or explicit dimensions).
+- Forms have labels, correct input types, helper/error text wired with `aria-describedby`/`aria-invalid`.
+- No placeholders, fake numbers, fake reviews, or invented trust claims.
 
 ## References
 
-- `references/design-tokens.md` - CSS variables for color, typography, spacing, radius, shadow, z-index, and motion.
-- `references/component-catalog.md` - Reusable Elementor-ready components and standards.
-- `references/elementor-implementation.md` - How to structure HTML widget code, scoped CSS, and vanilla JS.
-- `references/anti-slop-rules.md` - Visual quality gate for avoiding AI-looking UI.
-- `references/patterns-and-interactions.md` - UX patterns, responsive behavior, accessibility, and motion rules.
-- `references/reference-inspiration.md` - Principles extracted from the provided reference sites.
-- `references/library-growth.md` - How to add new components and improvements back into this skill.
+- `references/design-tokens.md` — full token dictionary: primitives → semantic → component layers, override recipes.
+- `references/component-catalog.md` — every shipped component: markup contract, variants, states, JS hooks, accessibility notes.
+- `references/patterns-and-interactions.md` — the `window.EDS` API, `data-eds-*` attributes, composition patterns, motion rules.
+- `references/elementor-implementation.md` — WordPress/Elementor integration: enqueueing, widget workflow, specificity strategy.
+- `references/anti-slop-rules.md` — visual quality gate for avoiding AI-looking UI.
+- `references/reference-inspiration.md` — calibration references and how to translate them into EDS decisions.
+- `references/library-growth.md` — how to add new components and tokens without breaking the system.

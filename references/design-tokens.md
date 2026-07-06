@@ -49,12 +49,13 @@ Rules:
 
 ## Override Recipes
 
-Paste after `eds.css` loads. Target `:root` (site-wide) or `.eds` (scoped).
+Paste after `eds.css` loads. Always target `:root, .eds` — tokens are declared on both, so a `:root`-only override is shadowed on the element carrying the `.eds` class.
 
 **Rebrand (teal example):**
 
 ```css
-:root {
+:root,
+.eds {
   --eds-primary: #0f766e;
   --eds-primary-hover: #115e59;
   --eds-primary-active: #134e4a;
@@ -67,19 +68,19 @@ Paste after `eds.css` loads. Target `:root` (site-wide) or `.eds` (scoped).
 **Brand font (only if the user provides one):**
 
 ```css
-:root { --eds-font-sans: "Brand Font", -apple-system, "Segoe UI", Roboto, sans-serif; }
+:root, .eds { --eds-font-sans: "Brand Font", -apple-system, "Segoe UI", Roboto, sans-serif; }
 ```
 
 **Sharper corners:**
 
 ```css
-:root { --eds-radius-sm: 3px; --eds-radius-md: 5px; --eds-radius-lg: 8px; --eds-radius-xl: 12px; }
+:root, .eds { --eds-radius-sm: 3px; --eds-radius-md: 5px; --eds-radius-lg: 8px; --eds-radius-xl: 12px; }
 ```
 
 **Tune one component:**
 
 ```css
-:root { --eds-btn-height: 48px; --eds-card-pad: var(--eds-space-6); }
+:root, .eds { --eds-btn-height: 48px; --eds-card-pad: var(--eds-space-6); }
 ```
 
 The Theming section of `styleguide.html` generates override blocks interactively.

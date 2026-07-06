@@ -40,10 +40,11 @@ Elementor: enqueue both files in the child theme (preferred) or paste the CSS in
 
 ## Theming a project
 
-Override semantic tokens after loading `eds.css` — that is the entire rebrand:
+Override semantic tokens after loading `eds.css` — that is the entire rebrand. Always target `:root, .eds` (not `:root` alone) so the override also wins on the element carrying the `.eds` scope class:
 
 ```css
-:root {
+:root,
+.eds {
   --eds-primary: #0d9488;
   --eds-primary-hover: #0f766e;
   --eds-primary-soft: #ccfbf1;

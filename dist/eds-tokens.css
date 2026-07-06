@@ -14,8 +14,9 @@
      3. Component   — per-component knobs (button height, card padding...)
                       so a single component can be tuned without forking.
 
-   Theming example (paste after this file):
-     .eds {
+   Theming example (paste after this file — target BOTH :root and .eds so
+   the override wins on the element carrying the .eds class):
+     :root, .eds {
        --eds-primary: #0f766e;
        --eds-primary-hover: #115e59;
        --eds-ring: #14b8a6;

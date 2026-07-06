@@ -1108,8 +1108,12 @@
 
   var RADIUS_BASE = { '--eds-radius-sm': 6, '--eds-radius-md': 10, '--eds-radius-lg': 14, '--eds-radius-xl': 20 };
 
+  /* Tokens are declared on `:root, .eds` — body carries .eds, so overrides
+     must be applied to the .eds element itself to win the cascade. */
+  var themeScope = document.body;
+
   function applyTheme() {
-    var root = document.documentElement;
+    var root = themeScope;
     themeInputs.forEach(function (i) { root.style.setProperty(i.dataset.var, i.value); });
     var s = parseFloat(radiusInput.value);
     radiusOut.textContent = s + '\u00d7';
@@ -1122,7 +1126,7 @@
   radiusInput.addEventListener('input', applyTheme);
 
   document.getElementById('th-reset').addEventListener('click', function () {
-    var root = document.documentElement;
+    var root = themeScope;
     themeInputs.forEach(function (i) {
       i.value = defaults[i.dataset.var];
       root.style.removeProperty(i.dataset.var);
@@ -1133,7 +1137,7 @@
   });
 
   document.getElementById('th-copy').addEventListener('click', function () {
-    var lines = [':root {'];
+    var lines = [':root,', '.eds {'];
     themeInputs.forEach(function (i) {
       if (i.value !== defaults[i.dataset.var]) lines.push('  ' + i.dataset.var + ': ' + i.value + ';');
     });
